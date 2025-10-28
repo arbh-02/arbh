@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+    
+    --card: 222 47% 14%;
+    --card-foreground: 210 40% 98%;
+    
+    --popover: 222 47% 12%;
+    --popover-foreground: 210 40% 98%;
+    
+    --primary: 263 70% 58%;
+    --primary-foreground: 210 40% 98%;
+    --primary-glow: 263 85% 68%;
+    
+    --secondary: 217 33% 20%;
+    --secondary-foreground: 210 40% 98%;
+    
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+    
+    --accent: 217 91% 60%;
+    --accent-foreground: 210 40% 98%;
+    
+    --success: 142 71% 45%;
+    --success-foreground: 210 40% 98%;
+    
+    --warning: 38 92% 50%;
+    --warning-foreground: 222 47% 11%;
+    
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 210 40% 98%;
+    
+    --border: 217 33% 22%;
+    --input: 217 33% 20%;
+    --ring: 263 70% 58%;
+    
+    --radius: 0.75rem;
+    
+    --sidebar-background: 222 47% 9%;
+    --sidebar-foreground: 210 40% 90%;
+    --sidebar-primary: 263 70% 58%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 217 33% 16%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217 33% 18%;
+    --sidebar-ring: 263 70% 58%;
+    
+    --gradient-primary: linear-gradient(135deg, hsl(263 70% 58%), hsl(263 85% 68%));
+    --gradient-card: linear-gradient(135deg, hsl(222 47% 14%), hsl(217 33% 16%));
+    --shadow-glow: 0 0 40px hsl(263 70% 58% / 0.15);
+    --shadow-card: 0 4px 20px hsl(222 47% 5% / 0.5);
+    --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold;
+  }
+}
+
+@layer components {
+  .card-gradient {
+    background: var(--gradient-card);
+  }
+  
+  .smooth-transition {
+    transition: var(--transition-smooth);
+  }
+  
+  .glow-effect {
+    box-shadow: var(--shadow-glow);
+  }
+}
