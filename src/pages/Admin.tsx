@@ -11,12 +11,14 @@ import { Navigate } from "react-router-dom";
 import { Tables } from "@/integrations/supabase/types";
 import { EditUserDialog } from "@/components/admin/EditUserDialog";
 import { NewUserDialog } from "@/components/admin/NewUserDialog";
+import { DeleteUserDialog } from "@/components/admin/DeleteUserDialog";
 
 type AppUser = Tables<'app_users'>;
 
 const Admin = () => {
   const { appUser } = useAuth();
   const [editingUser, setEditingUser] = useState<AppUser | null>(null);
+  const [deletingUser, setDeletingUser] = useState<AppUser | null>(null);
   const [isNewUserOpen, setIsNewUserOpen] = useState(false);
 
   const { data: users, isLoading } = useQuery<AppUser[]>({
@@ -85,7 +87,12 @@ const Admin = () => {
                         <Button variant="ghost" size="sm" onClick={() => setEditingUser(user)}>
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="sm" disabled={user.id === appUser?.id}>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          disabled={user.id === appUser?.id}
+                          onClick={() => setDeletingUser(user)}
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -103,6 +110,15 @@ const Admin = () => {
           user={editingUser}
           open={!!editingUser}
           onOpenChange={(open) => !open && setEditingUser(null)}
+        />
+      )}
+
+      {deletingUser && (
+        <DeleteUserDialog
+          userId={deletingUser.id}
+          userName={deletingUser.nome}
+          open={!!deletingUser}
+          onOpenChange={(open) => !open && setDeletingUser(null)}
         />
       )}
 
