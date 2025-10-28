@@ -3,7 +3,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency, formatDateShort } from "@/lib/format";
 import { Tables } from "@/integrations/supabase/types";
-import { CSS } from "@dnd-kit/utilities";
 
 type Lead = Tables<'leads'>;
 
@@ -17,9 +16,11 @@ export const DraggableLeadCard = ({ lead, onClick }: DraggableLeadCardProps) => 
     id: String(lead.id),
   });
 
-  const style = {
-    transform: CSS.Translate.toString(transform),
-  };
+  const style = transform
+    ? {
+        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+      }
+    : undefined;
 
   return (
     <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
