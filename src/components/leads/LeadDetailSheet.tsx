@@ -16,12 +16,14 @@ import { formatCurrency, formatDate } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
 import { EditLeadDialog } from "./EditLeadDialog";
 import { DeleteLeadDialog } from "./DeleteLeadDialog";
+import { Separator } from "@/components/ui/separator";
+import { ActivityTimeline } from "./ActivityTimeline";
 
 type Lead = Tables<'leads'>;
 type AppUser = Tables<'app_users'>;
 
 interface LeadDetailSheetProps {
-  leadId: number | null;
+  leadId: string | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -55,7 +57,7 @@ export const LeadDetailSheet = ({ leadId, open, onOpenChange }: LeadDetailSheetP
     queryKey: ['user', lead?.responsavel_id],
     queryFn: async () => {
       if (!lead?.responsavel_id) return null;
-      const { data, error } = await supabase.from('app_users').select('nome').eq('id', lead.responsavel_id).single();
+      const { data, error } = await supabase.from('app_users').select('nome').eq('id', lead.responsavel_id as any).single();
       if (error) throw new Error(error.message);
       return data;
     },
@@ -107,6 +109,11 @@ export const LeadDetailSheet = ({ leadId, open, onOpenChange }: LeadDetailSheetP
                 <DetailRow icon={BarChart} label="Status" value={<Badge className={getStatusColor(lead.status)}>{lead.status}</Badge>} />
                 <DetailRow icon={User} label="Responsável" value={user?.nome} />
                 <DetailRow icon={Calendar} label="Criado em" value={formatDate(lead.created_at)} />
+                <Separator />
+                <div>
+                  <h3 className="text-lg font-semibold mb-4">Atividades</h3>
+                  <ActivityTimeline leadId={lead.id as any} />
+                </div>
               </div>
               <SheetFooter className="mt-auto">
                 <Button variant="destructive" onClick={() => setIsDeleting(true)}>
@@ -131,7 +138,7 @@ export const LeadDetailSheet = ({ leadId, open, onOpenChange }: LeadDetailSheetP
       )}
       {lead && isDeleting && (
         <DeleteLeadDialog
-          leadId={lead.id}
+          leadId={lead.id as any}
           open={isDeleting}
           onOpenChange={setIsDeleting}
           onSuccess={handleCloseSheet}

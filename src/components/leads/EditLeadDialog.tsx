@@ -36,7 +36,7 @@ const formSchema = z.object({
   valor: z.coerce.number().min(0, "Valor não pode ser negativo").default(0),
   origem: z.enum(Constants.public.Enums.lead_origin),
   status: z.enum(Constants.public.Enums.lead_status),
-  responsavel_id: z.coerce.number({ required_error: "Responsável é obrigatório" }).min(1, "Responsável é obrigatório"),
+  responsavel_id: z.string({ required_error: "Responsável é obrigatório" }).uuid("Responsável é obrigatório"),
 });
 
 export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps) => {
@@ -64,7 +64,7 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
       valor: lead.valor,
       origem: lead.origem,
       status: lead.status,
-      responsavel_id: lead.responsavel_id,
+      responsavel_id: lead.responsavel_id as any,
     },
   });
 
@@ -76,7 +76,7 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
           ...values,
           email: values.email === "" ? null : values.email,
         })
-        .eq('id', lead.id)
+        .eq('id', lead.id as any)
         .select()
         .single();
 
@@ -140,13 +140,13 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
                 control={control}
                 name="responsavel_id"
                 render={({ field }) => (
-                  <Select onValueChange={(value) => field.onChange(Number(value))} defaultValue={String(field.value)}>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <SelectTrigger disabled={isLoadingUsers}>
                       <SelectValue placeholder="Selecione um responsável" />
                     </SelectTrigger>
                     <SelectContent>
                       {users?.map(user => (
-                        <SelectItem key={user.id} value={String(user.id)}>{user.nome}</SelectItem>
+                        <SelectItem key={user.id} value={user.id as any}>{user.nome}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>

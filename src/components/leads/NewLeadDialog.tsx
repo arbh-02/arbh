@@ -18,6 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Tables, Constants } from "@/integrations/supabase/types";
 import { Loader2 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 type AppUser = Tables<'app_users'>;
 
@@ -34,11 +35,12 @@ const formSchema = z.object({
   valor: z.coerce.number().min(0, "Valor não pode ser negativo").default(0),
   origem: z.enum(Constants.public.Enums.lead_origin),
   status: z.enum(Constants.public.Enums.lead_status).default("Novo"),
-  responsavel_id: z.coerce.number({ required_error: "Responsável é obrigatório" }).min(1, "Responsável é obrigatório"),
+  responsavel_id: z.string({ required_error: "Responsável é obrigatório" }).uuid("Responsável é obrigatório"),
 });
 
 export const NewLeadDialog = ({ open, onOpenChange }: NewLeadDialogProps) => {
   const queryClient = useQueryClient();
+  const { appUser } = useAuth();
 
   const { data: users, isLoading: isLoadingUsers } = useQuery<AppUser[]>({
     queryKey: ['users'],
@@ -66,12 +68,14 @@ export const NewLeadDialog = ({ open, onOpenChange }: NewLeadDialogProps) => {
 
   const mutation = useMutation({
     mutationFn: async (values: z.infer<typeof formSchema>) => {
+      if (!appUser) throw new Error("Usuário não autenticado");
       const { data, error } = await supabase
         .from("leads")
         .insert({
           ...values,
           email: values.email === "" ? null : values.email,
-        })
+          created_by: appUser.id,
+        } as any)
         .select()
         .single();
 
@@ -142,13 +146,13 @@ export const NewLeadDialog = ({ open, onOpenChange }: NewLeadDialogProps) => {
                 control={control}
                 name="responsavel_id"
                 render={({ field }) => (
-                  <Select onValueChange={(value) => field.onChange(Number(value))} defaultValue={String(field.value)}>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <SelectTrigger disabled={isLoadingUsers}>
                       <SelectValue placeholder="Selecione um responsável" />
                     </SelectTrigger>
                     <SelectContent>
                       {users?.map(user => (
-                        <SelectItem key={user.id} value={String(user.id)}>{user.nome}</SelectItem>
+                        <SelectItem key={user.id} value={user.id as any}>{user.nome}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>

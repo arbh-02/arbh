@@ -20,7 +20,7 @@ type AppUser = Tables<'app_users'>;
 const Leads = () => {
   const { ui, setUI } = useApp();
   const [isNewLeadOpen, setIsNewLeadOpen] = useState(false);
-  const [selectedLeadId, setSelectedLeadId] = useState<number | null>(null);
+  const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
 
   const { data: leads, isLoading: isLoadingLeads } = useQuery<Lead[]>({
     queryKey: ['leads'],
@@ -41,8 +41,8 @@ const Leads = () => {
   });
 
   const usersMap = useMemo(() => {
-    if (!users) return new Map<number, string>();
-    return new Map(users.map(user => [user.id, user.nome]));
+    if (!users) return new Map<string, string>();
+    return new Map(users.map(user => [user.id as any, user.nome]));
   }, [users]);
 
   const filteredLeads = useMemo(() => {
@@ -70,7 +70,7 @@ const Leads = () => {
       Telefone: lead.telefone,
       Origem: lead.origem,
       Status: lead.status,
-      Responsavel: usersMap.get(lead.responsavel_id) || '',
+      Responsavel: usersMap.get(lead.responsavel_id as any) || '',
       Valor: lead.valor,
       'Criado Em': formatDate(lead.created_at),
     }));
@@ -152,7 +152,7 @@ const Leads = () => {
                   <tr 
                     key={lead.id} 
                     className="border-b border-border/50 hover:bg-muted/50 transition-colors cursor-pointer"
-                    onClick={() => setSelectedLeadId(lead.id)}
+                    onClick={() => setSelectedLeadId(lead.id as any)}
                   >
                     <td className="py-3 px-4">
                       <div className="font-medium">{lead.nome}</div>
@@ -162,7 +162,7 @@ const Leads = () => {
                     <td className="py-3 px-4">
                       <Badge className={getStatusColor(lead.status)}>{lead.status}</Badge>
                     </td>
-                    <td className="py-3 px-4">{usersMap.get(lead.responsavel_id)}</td>
+                    <td className="py-3 px-4">{usersMap.get(lead.responsavel_id as any)}</td>
                     <td className="py-3 px-4 font-semibold">{formatCurrency(lead.valor)}</td>
                     <td className="py-3 px-4 text-sm text-muted-foreground">{formatDate(lead.created_at)}</td>
                   </tr>

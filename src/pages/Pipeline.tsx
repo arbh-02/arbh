@@ -25,7 +25,7 @@ const Pipeline = () => {
   const queryClient = useQueryClient();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [isNewLeadOpen, setIsNewLeadOpen] = useState(false);
-  const [selectedLeadId, setSelectedLeadId] = useState<number | null>(null);
+  const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
@@ -39,7 +39,7 @@ const Pipeline = () => {
   });
 
   const updateLeadStatusMutation = useMutation({
-    mutationFn: async ({ leadId, newStatus }: { leadId: number, newStatus: LeadStatus }) => {
+    mutationFn: async ({ leadId, newStatus }: { leadId: string, newStatus: LeadStatus }) => {
       const { error } = await supabase.from('leads').update({ status: newStatus }).eq('id', leadId);
       if (error) throw new Error(error.message);
     },
@@ -67,13 +67,13 @@ const Pipeline = () => {
     setActiveId(null);
     if (!over) return;
 
-    const leadId = Number(active.id);
+    const leadId = active.id as string;
     const newStatus = over.id as LeadStatus;
-    const lead = leads?.find(l => l.id === leadId);
+    const lead = leads?.find(l => (l.id as any) === leadId);
 
     if (!lead || lead.status === newStatus) return;
 
-    if (appUser?.papel === "vendedor" && lead.responsavel_id !== appUser.id) {
+    if (appUser?.papel === "vendedor" && (lead.responsavel_id as any) !== appUser.id) {
       toast.error("Você só pode mover seus próprios leads");
       return;
     }
@@ -91,7 +91,7 @@ const Pipeline = () => {
     }
   };
 
-  const activeLead = activeId ? leads?.find(l => l.id === Number(activeId)) : null;
+  const activeLead = activeId ? leads?.find(l => (l.id as any) === activeId) : null;
 
   return (
     <MainLayout>
@@ -121,7 +121,7 @@ const Pipeline = () => {
                     <DraggableLeadCard
                       key={lead.id}
                       lead={lead}
-                      onClick={() => setSelectedLeadId(lead.id)}
+                      onClick={() => setSelectedLeadId(lead.id as any)}
                     />
                   ))}
                 </DroppableColumn>

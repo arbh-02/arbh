@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
 interface DeleteLeadDialogProps {
-  leadId: number;
+  leadId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;

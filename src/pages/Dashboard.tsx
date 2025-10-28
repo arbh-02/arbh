@@ -101,7 +101,7 @@ const Dashboard = () => {
     const vendedores = users.filter(u => u.papel === "vendedor");
     
     return vendedores.map(vendedor => {
-      const vendedorLeads = filteredLeads.filter(l => l.responsible_id === vendedor.id);
+      const vendedorLeads = filteredLeads.filter(l => (l.responsible_id as any) === vendedor.id);
       const ganhos = vendedorLeads.filter(l => l.status === "Ganho");
       const valorGanho = ganhos.reduce((sum, l) => sum + l.value, 0);
       const conversao = vendedorLeads.length > 0 ? (ganhos.length / vendedorLeads.length) * 100 : 0;
