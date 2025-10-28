@@ -1,15 +1,33 @@
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { useApp } from "@/contexts/AppContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, Edit } from "lucide-react";
+import { Plus, Trash2, Edit, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Navigate } from "react-router-dom";
+import { Tables } from "@/integrations/supabase/types";
+import { EditUserDialog } from "@/components/admin/EditUserDialog";
+
+type AppUser = Tables<'app_users'>;
 
 const Admin = () => {
-  const { currentUser, users } = useApp();
+  const { appUser } = useAuth();
+  const [editingUser, setEditingUser] = useState<AppUser | null>(null);
 
-  if (currentUser.papel !== "admin") {
+  const { data: users, isLoading } = useQuery<AppUser[]>({
+    queryKey: ['users'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('app_users').select('*').order('nome', { ascending: true });
+      if (error) throw new Error(error.message);
+      return data || [];
+    },
+    enabled: appUser?.papel === 'admin',
+  });
+
+  if (appUser && appUser.papel !== "admin") {
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -19,7 +37,7 @@ const Admin = () => {
         title="Administração"
         description="Gestão de usuários e configurações"
         actions={
-          <Button>
+          <Button disabled>
             <Plus className="mr-2 h-4 w-4" />
             Novo Usuário
           </Button>
@@ -38,34 +56,53 @@ const Admin = () => {
               </tr>
             </thead>
             <tbody>
-              {users.map((user) => (
-                <tr 
-                  key={user.id} 
-                  className="border-b border-border/50 hover:bg-muted/50 transition-colors"
-                >
-                  <td className="py-3 px-4 font-medium">{user.nome}</td>
-                  <td className="py-3 px-4 text-muted-foreground">{user.email}</td>
-                  <td className="py-3 px-4">
-                    <Badge variant={user.papel === "admin" ? "default" : "secondary"} className="capitalize">
-                      {user.papel}
-                    </Badge>
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="flex justify-end gap-2">
-                      <Button variant="ghost" size="sm">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm" disabled={user.id === currentUser.id}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+              {isLoading ? (
+                <tr>
+                  <td colSpan={4} className="text-center py-8">
+                    <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
                   </td>
                 </tr>
-              ))}
+              ) : (
+                users?.map((user) => (
+                  <tr 
+                    key={user.id} 
+                    className="border-b border-border/50 hover:bg-muted/50 transition-colors"
+                  >
+                    <td className="py-3 px-4 font-medium">{user.nome}</td>
+                    <td className="py-3 px-4 text-muted-foreground">{user.email}</td>
+                    <td className="py-3 px-4">
+                      <Badge 
+                        variant={user.papel === "admin" ? "default" : user.papel === "vendedor" ? "secondary" : "outline"} 
+                        className="capitalize"
+                      >
+                        {user.papel}
+                      </Badge>
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="flex justify-end gap-2">
+                        <Button variant="ghost" size="sm" onClick={() => setEditingUser(user)}>
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm" disabled={user.id === appUser?.id}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
       </div>
+
+      {editingUser && (
+        <EditUserDialog
+          user={editingUser}
+          open={!!editingUser}
+          onOpenChange={(open) => !open && setEditingUser(null)}
+        />
+      )}
     </MainLayout>
   );
 };
