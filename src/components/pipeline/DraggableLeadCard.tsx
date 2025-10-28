@@ -1,0 +1,43 @@
+import { useDraggable } from "@dnd-kit/core";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { formatCurrency, formatDateShort } from "@/lib/format";
+import { Tables } from "@/integrations/supabase/types";
+import { CSS } from "@dnd-kit/utilities";
+
+type Lead = Tables<'leads'>;
+
+interface DraggableLeadCardProps {
+  lead: Lead;
+  onClick: () => void;
+}
+
+export const DraggableLeadCard = ({ lead, onClick }: DraggableLeadCardProps) => {
+  const { attributes, listeners, setNodeRef, transform } = useDraggable({
+    id: String(lead.id),
+  });
+
+  const style = {
+    transform: CSS.Translate.toString(transform),
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
+      <Card
+        className="cursor-move hover:shadow-lg transition-shadow card-gradient border-border"
+        onClick={onClick}
+      >
+        <CardContent className="p-4">
+          <div className="space-y-2">
+            <p className="font-medium">{lead.nome}</p>
+            <p className="text-lg font-bold text-primary">{formatCurrency(lead.valor)}</p>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">{formatDateShort(lead.criado_em)}</span>
+              <Badge variant="outline">{lead.origem}</Badge>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};

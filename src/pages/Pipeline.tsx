@@ -14,6 +14,8 @@ import { Tables, Constants } from "@/integrations/supabase/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { NewLeadDialog } from "@/components/leads/NewLeadDialog";
 import { LeadDetailSheet } from "@/components/leads/LeadDetailSheet";
+import { DroppableColumn } from "@/components/pipeline/DroppableColumn";
+import { DraggableLeadCard } from "@/components/pipeline/DraggableLeadCard";
 
 type Lead = Tables<'leads'>;
 type LeadStatus = Tables<'leads'>['status'];
@@ -46,7 +48,7 @@ const Pipeline = () => {
     },
     onError: (error) => {
       toast.error(`Erro ao mover lead: ${error.message}`);
-      queryClient.invalidateQueries({ queryKey: ['leads'] }); // Revert optimistic update on error
+      queryClient.invalidateQueries({ queryKey: ['leads'] });
     }
   });
 
@@ -56,7 +58,7 @@ const Pipeline = () => {
   };
 
   const handleDragStart = (event: DragStartEvent) => {
-    setSelectedLeadId(null); // Close sheet if open
+    setSelectedLeadId(null);
     setActiveId(event.active.id as string);
   };
 
@@ -114,37 +116,15 @@ const Pipeline = () => {
             {Constants.public.Enums.lead_status.map(status => {
               const statusLeads = getLeadsByStatus(status);
               return (
-                <div
-                  key={status}
-                  id={status}
-                  className="flex flex-col rounded-lg border border-border bg-card p-4 min-h-[500px]"
-                >
-                  <div className="mb-4 flex items-center justify-between">
-                    <h3 className="font-semibold">{status}</h3>
-                    <Badge variant="secondary">{statusLeads.length}</Badge>
-                  </div>
-                  <div className="space-y-3 flex-1">
-                    {statusLeads.map(lead => (
-                      <Card
-                        key={lead.id}
-                        id={String(lead.id)}
-                        className="cursor-move hover:shadow-lg transition-shadow card-gradient border-border"
-                        onClick={() => setSelectedLeadId(lead.id)}
-                      >
-                        <CardContent className="p-4">
-                          <div className="space-y-2">
-                            <p className="font-medium">{lead.nome}</p>
-                            <p className="text-lg font-bold text-primary">{formatCurrency(lead.valor)}</p>
-                            <div className="flex items-center justify-between text-sm">
-                              <span className="text-muted-foreground">{formatDateShort(lead.criado_em)}</span>
-                              <Badge variant="outline">{lead.origem}</Badge>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
+                <DroppableColumn key={status} id={status} title={status} count={statusLeads.length}>
+                  {statusLeads.map(lead => (
+                    <DraggableLeadCard
+                      key={lead.id}
+                      lead={lead}
+                      onClick={() => setSelectedLeadId(lead.id)}
+                    />
+                  ))}
+                </DroppableColumn>
               );
             })}
           </div>
