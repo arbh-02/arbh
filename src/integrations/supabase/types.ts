@@ -14,134 +14,167 @@ export type Database = {
   }
   public: {
     Tables: {
-      app_users: {
+      activities: {
         Row: {
-          auth_uid: string | null
-          criado_em: string
-          email: string | null
-          id: number
-          nome: string
-          papel: Database["public"]["Enums"]["user_role"]
+          id: string
+          lead_id: string
+          assigned_to_id: string
+          created_by_id: string
+          type: "ligação" | "email" | "reunião" | "outro"
+          due_date: string
+          notes: string | null
+          is_completed: boolean
+          created_at: string | null
+          completed_at: string | null
         }
         Insert: {
-          auth_uid?: string | null
-          criado_em?: string
-          email?: string | null
-          id?: number
-          nome: string
-          papel?: Database["public"]["Enums"]["user_role"]
+          id?: string
+          lead_id: string
+          assigned_to_id: string
+          created_by_id: string
+          type: "ligação" | "email" | "reunião" | "outro"
+          due_date: string
+          notes?: string | null
+          is_completed?: boolean
+          created_at?: string | null
+          completed_at?: string | null
         }
         Update: {
-          auth_uid?: string | null
-          criado_em?: string
-          email?: string | null
-          id?: number
+          id?: string
+          lead_id?: string
+          assigned_to_id?: string
+          created_by_id?: string
+          type?: "ligação" | "email" | "reunião" | "outro"
+          due_date?: string
+          notes?: string | null
+          is_completed?: boolean
+          created_at?: string | null
+          completed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activities_assigned_to_id_fkey"
+            columns: ["assigned_to_id"]
+            isOneToOne: false
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_created_by_id_fkey"
+            columns: ["created_by_id"]
+            isOneToOne: false
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      app_users: {
+        Row: {
+          id: string
+          nome: string
+          email: string
+          papel: Database["public"]["Enums"]["app_role"]
+          created_at: string
+          updated_at: string | null
+        }
+        Insert: {
+          id: string
+          nome: string
+          email: string
+          papel: Database["public"]["Enums"]["app_role"]
+          created_at?: string
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
           nome?: string
-          papel?: Database["public"]["Enums"]["user_role"]
+          email?: string
+          papel?: Database["public"]["Enums"]["app_role"]
+          created_at?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
       leads: {
         Row: {
-          criado_em: string
-          email: string | null
-          empresa: string | null
-          id: number
+          id: string
           nome: string
-          observacoes: string | null
-          origem: Database["public"]["Enums"]["lead_origin"]
-          responsavel_id: number
-          status: Database["public"]["Enums"]["lead_status"]
+          empresa: string | null
+          email: string | null
           telefone: string | null
+          origem: Database["public"]["Enums"]["lead_origin"]
           valor: number
+          status: Database["public"]["Enums"]["lead_status"]
+          responsavel_id: string | null
+          created_by: string
+          observacoes: string | null
+          created_at: string
+          updated_at: string | null
         }
         Insert: {
-          criado_em?: string
-          email?: string | null
-          empresa?: string | null
-          id?: number
+          id?: string
           nome: string
-          observacoes?: string | null
-          origem: Database["public"]["Enums"]["lead_origin"]
-          responsavel_id: number
-          status?: Database["public"]["Enums"]["lead_status"]
+          empresa?: string | null
+          email?: string | null
           telefone?: string | null
+          origem: Database["public"]["Enums"]["lead_origin"]
           valor?: number
+          status?: Database["public"]["Enums"]["lead_status"]
+          responsavel_id?: string | null
+          created_by: string
+          observacoes?: string | null
+          created_at?: string
+          updated_at?: string | null
         }
         Update: {
-          criado_em?: string
-          email?: string | null
-          empresa?: string | null
-          id?: number
+          id?: string
           nome?: string
-          observacoes?: string | null
-          origem?: Database["public"]["Enums"]["lead_origin"]
-          responsavel_id?: number
-          status?: Database["public"]["Enums"]["lead_status"]
+          empresa?: string | null
+          email?: string | null
           telefone?: string | null
+          origem?: Database["public"]["Enums"]["lead_origin"]
           valor?: number
+          status?: Database["public"]["Enums"]["lead_status"]
+          responsavel_id?: string | null
+          created_by?: string
+          observacoes?: string | null
+          created_at?: string
+          updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "leads_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "leads_responsavel_id_fkey"
             columns: ["responsavel_id"]
             isOneToOne: false
             referencedRelation: "app_users"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
     }
     Views: {
-      vw_dashboard_por_dia: {
-        Row: {
-          dia: string | null
-          leads_criados: number | null
-          valor_ganho: number | null
-        }
-        Relationships: []
-      }
-      vw_dashboard_por_origem: {
-        Row: {
-          origem: Database["public"]["Enums"]["lead_origin"] | null
-          total_leads: number | null
-          valor_ganho: number | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
-      current_identity: {
-        Args: never
-        Returns: {
-          role: Database["public"]["Enums"]["user_role"]
-          user_id: number
-        }[]
-      }
-      current_user_id: { Args: never; Returns: number }
-      current_user_role: {
-        Args: never
-        Returns: Database["public"]["Enums"]["user_role"]
-      }
-      init_current_user: {
-        Args: { p_email: string; p_nome: string }
-        Returns: {
-          auth_uid: string | null
-          criado_em: string
-          email: string | null
-          id: number
-          nome: string
-          papel: Database["public"]["Enums"]["user_role"]
-        }
-        SetofOptions: {
-          from: "*"
-          to: "app_users"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
+      [_ in never]: never
     }
     Enums: {
+      activity_type: "ligação" | "email" | "reunião" | "outro"
+      app_role: "admin" | "vendedor" | "nenhum"
       lead_origin:
         | "Formulário"
         | "WhatsApp"
@@ -149,7 +182,6 @@ export type Database = {
         | "Indicação"
         | "Outros"
       lead_status: "Novo" | "Atendimento" | "Ganho" | "Perdido"
-      user_role: "admin" | "vendedor" | "nenhum"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -285,7 +317,7 @@ export const Constants = {
         "Outros",
       ],
       lead_status: ["Novo", "Atendimento", "Ganho", "Perdido"],
-      user_role: ["admin", "vendedor", "nenhum"],
+      app_role: ["admin", "vendedor", "nenhum"],
     },
   },
 } as const

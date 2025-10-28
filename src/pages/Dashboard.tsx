@@ -47,7 +47,7 @@ const Dashboard = () => {
     const negociosGanhos = filteredLeads.filter(l => l.status === "Ganho").length;
     const valorGanho = filteredLeads
       .filter(l => l.status === "Ganho")
-      .reduce((sum, l) => sum + l.value, 0);
+      .reduce((sum, l) => sum + l.valor, 0);
     const taxaConversao = totalLeads > 0 ? (negociosGanhos / totalLeads) * 100 : 0;
 
     return { totalLeads, negociosGanhos, valorGanho, taxaConversao };
@@ -67,7 +67,7 @@ const Dashboard = () => {
       const entry = dataMap.get(dayKey)!;
       entry.leadsCount++;
       if (lead.status === "Ganho") {
-        entry.valorGanho += lead.value;
+        entry.valorGanho += lead.valor;
       }
     });
 
@@ -82,14 +82,14 @@ const Dashboard = () => {
     const dataMap = new Map<string, { origem: string; totalLeads: number; valorGanho: number }>();
     
     filteredLeads.forEach(lead => {
-      if (!dataMap.has(lead.origin)) {
-        dataMap.set(lead.origin, { origem: lead.origin, totalLeads: 0, valorGanho: 0 });
+      if (!dataMap.has(lead.origem)) {
+        dataMap.set(lead.origem, { origem: lead.origem, totalLeads: 0, valorGanho: 0 });
       }
       
-      const entry = dataMap.get(lead.origin)!;
+      const entry = dataMap.get(lead.origem)!;
       entry.totalLeads++;
       if (lead.status === "Ganho") {
-        entry.valorGanho += lead.value;
+        entry.valorGanho += lead.valor;
       }
     });
 
@@ -101,9 +101,9 @@ const Dashboard = () => {
     const vendedores = users.filter(u => u.papel === "vendedor");
     
     return vendedores.map(vendedor => {
-      const vendedorLeads = filteredLeads.filter(l => (l.responsible_id as any) === vendedor.id);
+      const vendedorLeads = filteredLeads.filter(l => l.responsavel_id === vendedor.id);
       const ganhos = vendedorLeads.filter(l => l.status === "Ganho");
-      const valorGanho = ganhos.reduce((sum, l) => sum + l.value, 0);
+      const valorGanho = ganhos.reduce((sum, l) => sum + l.valor, 0);
       const conversao = vendedorLeads.length > 0 ? (ganhos.length / vendedorLeads.length) * 100 : 0;
 
       return {
