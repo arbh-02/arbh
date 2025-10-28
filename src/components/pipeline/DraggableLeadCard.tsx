@@ -33,7 +33,7 @@ export const DraggableLeadCard = ({ lead, onClick }: DraggableLeadCardProps) => 
             <p className="font-medium">{lead.nome}</p>
             <p className="text-lg font-bold text-primary">{formatCurrency(lead.valor)}</p>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">{formatDateShort(lead.criado_em)}</span>
+              <span className="text-muted-foreground">{formatDateShort(lead.created_at)}</span>
               <Badge variant="outline">{lead.origem}</Badge>
             </div>
           </div>

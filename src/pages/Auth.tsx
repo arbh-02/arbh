@@ -8,36 +8,54 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+
+const signUpSchema = z.object({
+  nome: z.string().min(1, "Nome é obrigatório"),
+  email: z.string().email("Formato de e-mail inválido"),
+  password: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
+});
+
+const signInSchema = z.object({
+  email: z.string().email("Formato de e-mail inválido"),
+  password: z.string().min(1, "Senha é obrigatória"),
+});
+
+type SignUpFormValues = z.infer<typeof signUpSchema>;
+type SignInFormValues = z.infer<typeof signInSchema>;
 
 const Auth = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [signUpData, setSignUpData] = useState({ nome: "", email: "", password: "" });
-  const [signInData, setSignInData] = useState({ email: "", password: "" });
 
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!signUpData.nome || !signUpData.email || !signUpData.password) {
-      toast.error("Preencha todos os campos");
-      return;
-    }
+  const {
+    register: registerSignUp,
+    handleSubmit: handleSubmitSignUp,
+    formState: { errors: errorsSignUp },
+  } = useForm<SignUpFormValues>({
+    resolver: zodResolver(signUpSchema),
+  });
 
-    if (signUpData.password.length < 6) {
-      toast.error("A senha deve ter no mínimo 6 caracteres");
-      return;
-    }
+  const {
+    register: registerSignIn,
+    handleSubmit: handleSubmitSignIn,
+    formState: { errors: errorsSignIn },
+  } = useForm<SignInFormValues>({
+    resolver: zodResolver(signInSchema),
+  });
 
+  const handleSignUp = async (values: SignUpFormValues) => {
     setLoading(true);
-
     try {
       const { data, error } = await supabase.auth.signUp({
-        email: signUpData.email,
-        password: signUpData.password,
+        email: values.email,
+        password: values.password,
         options: {
           emailRedirectTo: `${window.location.origin}/dashboard`,
           data: {
-            nome: signUpData.nome,
+            nome: values.nome,
           },
         },
       });
@@ -49,8 +67,6 @@ const Auth = () => {
 
       if (data.user) {
         toast.success("Conta criada com sucesso! Verifique seu e-mail para confirmação.");
-        // A trigger no Supabase cuidará da criação do perfil do usuário.
-        // O usuário será redirecionado após a confirmação do e-mail ou no próximo login.
         navigate("/dashboard");
       }
     } catch (error: any) {
@@ -60,20 +76,12 @@ const Auth = () => {
     }
   };
 
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!signInData.email || !signInData.password) {
-      toast.error("Preencha todos os campos");
-      return;
-    }
-
+  const handleSignIn = async (values: SignInFormValues) => {
     setLoading(true);
-
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: signInData.email,
-        password: signInData.password,
+        email: values.email,
+        password: values.password,
       });
 
       if (error) {
@@ -111,18 +119,17 @@ const Auth = () => {
             </TabsList>
             
             <TabsContent value="signin">
-              <form onSubmit={handleSignIn} className="space-y-4">
+              <form onSubmit={handleSubmitSignIn(handleSignIn)} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="signin-email">Email</Label>
                   <Input
                     id="signin-email"
                     type="email"
                     placeholder="seu@email.com"
-                    value={signInData.email}
-                    onChange={(e) => setSignInData({ ...signInData, email: e.target.value })}
+                    {...registerSignIn("email")}
                     disabled={loading}
-                    required
                   />
+                  {errorsSignIn.email && <p className="text-sm text-destructive">{errorsSignIn.email.message}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signin-password">Senha</Label>
@@ -130,11 +137,10 @@ const Auth = () => {
                     id="signin-password"
                     type="password"
                     placeholder="••••••"
-                    value={signInData.password}
-                    onChange={(e) => setSignInData({ ...signInData, password: e.target.value })}
+                    {...registerSignIn("password")}
                     disabled={loading}
-                    required
                   />
+                  {errorsSignIn.password && <p className="text-sm text-destructive">{errorsSignIn.password.message}</p>}
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -144,18 +150,17 @@ const Auth = () => {
             </TabsContent>
             
             <TabsContent value="signup">
-              <form onSubmit={handleSignUp} className="space-y-4">
+              <form onSubmit={handleSubmitSignUp(handleSignUp)} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="signup-name">Nome Completo</Label>
                   <Input
                     id="signup-name"
                     type="text"
                     placeholder="Seu nome"
-                    value={signUpData.nome}
-                    onChange={(e) => setSignUpData({ ...signUpData, nome: e.target.value })}
+                    {...registerSignUp("nome")}
                     disabled={loading}
-                    required
                   />
+                  {errorsSignUp.nome && <p className="text-sm text-destructive">{errorsSignUp.nome.message}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-email">Email</Label>
@@ -163,11 +168,10 @@ const Auth = () => {
                     id="signup-email"
                     type="email"
                     placeholder="seu@email.com"
-                    value={signUpData.email}
-                    onChange={(e) => setSignUpData({ ...signUpData, email: e.target.value })}
+                    {...registerSignUp("email")}
                     disabled={loading}
-                    required
                   />
+                  {errorsSignUp.email && <p className="text-sm text-destructive">{errorsSignUp.email.message}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-password">Senha</Label>
@@ -175,12 +179,10 @@ const Auth = () => {
                     id="signup-password"
                     type="password"
                     placeholder="••••••"
-                    value={signUpData.password}
-                    onChange={(e) => setSignUpData({ ...signUpData, password: e.target.value })}
+                    {...registerSignUp("password")}
                     disabled={loading}
-                    required
-                    minLength={6}
                   />
+                  {errorsSignUp.password && <p className="text-sm text-destructive">{errorsSignUp.password.message}</p>}
                   <p className="text-xs text-muted-foreground">Mínimo 6 caracteres</p>
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>

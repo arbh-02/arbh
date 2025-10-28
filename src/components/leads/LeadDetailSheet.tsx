@@ -106,7 +106,7 @@ export const LeadDetailSheet = ({ leadId, open, onOpenChange }: LeadDetailSheetP
                 <DetailRow icon={Tag} label="Origem" value={<Badge variant="outline">{lead.origem}</Badge>} />
                 <DetailRow icon={BarChart} label="Status" value={<Badge className={getStatusColor(lead.status)}>{lead.status}</Badge>} />
                 <DetailRow icon={User} label="Responsável" value={user?.nome} />
-                <DetailRow icon={Calendar} label="Criado em" value={formatDate(lead.criado_em)} />
+                <DetailRow icon={Calendar} label="Criado em" value={formatDate(lead.created_at)} />
               </div>
               <SheetFooter className="mt-auto">
                 <Button variant="destructive" onClick={() => setIsDeleting(true)}>

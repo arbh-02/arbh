@@ -39,7 +39,7 @@ const Dashboard = () => {
   const filteredLeads = useMemo(() => {
     if (!leads) return [];
     const { start, end } = getDateRangeForPeriod(ui.periodo);
-    return leads.filter(lead => isDateInRange(lead.criado_em, start, end));
+    return leads.filter(lead => isDateInRange(lead.created_at, start, end));
   }, [leads, ui.periodo]);
 
   const kpis = useMemo(() => {
@@ -57,7 +57,7 @@ const Dashboard = () => {
     const dataMap = new Map<string, { dia: string; leadsCount: number; valorGanho: number }>();
     
     filteredLeads.forEach(lead => {
-      const date = new Date(lead.criado_em);
+      const date = new Date(lead.created_at);
       const dayKey = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}`;
       
       if (!dataMap.has(dayKey)) {

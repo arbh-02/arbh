@@ -92,7 +92,7 @@ const Profile = () => {
               <div>
                 <Label className="text-muted-foreground">Data de Criação</Label>
                 <p className="mt-1 text-sm">
-                  {new Date(appUser.criado_em).toLocaleDateString('pt-BR', {
+                  {new Date(appUser.created_at).toLocaleDateString('pt-BR', {
                     day: '2-digit',
                     month: 'long',
                     year: 'numeric',

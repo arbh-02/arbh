@@ -25,7 +25,7 @@ const Leads = () => {
   const { data: leads, isLoading: isLoadingLeads } = useQuery<Lead[]>({
     queryKey: ['leads'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('leads').select('*').order('criado_em', { ascending: false });
+      const { data, error } = await supabase.from('leads').select('*').order('created_at', { ascending: false });
       if (error) throw new Error(error.message);
       return data || [];
     }
@@ -72,7 +72,7 @@ const Leads = () => {
       Status: lead.status,
       Responsavel: usersMap.get(lead.responsavel_id) || '',
       Valor: lead.valor,
-      'Criado Em': formatDate(lead.criado_em),
+      'Criado Em': formatDate(lead.created_at),
     }));
 
     exportToCSV(exportData, 'leads_export');
@@ -164,7 +164,7 @@ const Leads = () => {
                     </td>
                     <td className="py-3 px-4">{usersMap.get(lead.responsavel_id)}</td>
                     <td className="py-3 px-4 font-semibold">{formatCurrency(lead.valor)}</td>
-                    <td className="py-3 px-4 text-sm text-muted-foreground">{formatDate(lead.criado_em)}</td>
+                    <td className="py-3 px-4 text-sm text-muted-foreground">{formatDate(lead.created_at)}</td>
                   </tr>
                 ))
               )}
