@@ -10,12 +10,14 @@ import { Badge } from "@/components/ui/badge";
 import { Navigate } from "react-router-dom";
 import { Tables } from "@/integrations/supabase/types";
 import { EditUserDialog } from "@/components/admin/EditUserDialog";
+import { NewUserDialog } from "@/components/admin/NewUserDialog";
 
 type AppUser = Tables<'app_users'>;
 
 const Admin = () => {
   const { appUser } = useAuth();
   const [editingUser, setEditingUser] = useState<AppUser | null>(null);
+  const [isNewUserOpen, setIsNewUserOpen] = useState(false);
 
   const { data: users, isLoading } = useQuery<AppUser[]>({
     queryKey: ['users'],
@@ -37,7 +39,7 @@ const Admin = () => {
         title="Administração"
         description="Gestão de usuários e configurações"
         actions={
-          <Button disabled>
+          <Button onClick={() => setIsNewUserOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
             Novo Usuário
           </Button>
@@ -103,6 +105,8 @@ const Admin = () => {
           onOpenChange={(open) => !open && setEditingUser(null)}
         />
       )}
+
+      <NewUserDialog open={isNewUserOpen} onOpenChange={setIsNewUserOpen} />
     </MainLayout>
   );
 };
