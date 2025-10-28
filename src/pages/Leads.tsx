@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { useApp } from "@/contexts/AppContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Download, Search, Loader2, MessageSquare, Edit, Trash2 } from "lucide-react";
+import { Plus, Download, Search, Loader2, MessageSquare, Edit, Trash2, Upload } from "lucide-react";
 import { formatCurrency, formatDate, exportToCSV, getWhatsAppLink } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -17,6 +17,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { getLeadOriginLabel, getLeadStatusLabel } from "@/lib/mapping";
 import { EditLeadDialog } from "@/components/leads/EditLeadDialog";
 import { DeleteLeadDialog } from "@/components/leads/DeleteLeadDialog";
+import { ImportLeadsDialog } from "@/components/leads/ImportLeadsDialog";
 
 type Lead = Tables<'leads'>;
 type AppUser = Tables<'app_users'>;
@@ -24,6 +25,7 @@ type AppUser = Tables<'app_users'>;
 const Leads = () => {
   const { ui, setUI } = useApp();
   const [isNewLeadOpen, setIsNewLeadOpen] = useState(false);
+  const [isImportOpen, setIsImportOpen] = useState(false);
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
   const [editingLead, setEditingLead] = useState<Lead | null>(null);
   const [deletingLead, setDeletingLead] = useState<Lead | null>(null);
@@ -103,6 +105,10 @@ const Leads = () => {
         description="Gestão completa de leads"
         actions={
           <>
+            <Button variant="outline" onClick={() => setIsImportOpen(true)}>
+              <Upload className="mr-2 h-4 w-4" />
+              Importar
+            </Button>
             <Button variant="outline" onClick={handleExportCSV}>
               <Download className="mr-2 h-4 w-4" />
               Exportar CSV
@@ -222,6 +228,7 @@ const Leads = () => {
         </div>
       </div>
       <NewLeadDialog open={isNewLeadOpen} onOpenChange={setIsNewLeadOpen} />
+      <ImportLeadsDialog open={isImportOpen} onOpenChange={setIsImportOpen} />
       <LeadDetailSheet
         leadId={selectedLeadId}
         open={!!selectedLeadId}
