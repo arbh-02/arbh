@@ -7,6 +7,7 @@ interface UIState {
   tabelaDensa: boolean;
   animacoes: boolean;
   buscaLeads: string;
+  isSidebarOpen: boolean;
 }
 
 interface AppContextType {
@@ -22,6 +23,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     tabelaDensa: false,
     animacoes: true,
     buscaLeads: "",
+    isSidebarOpen: false,
   });
 
   const setUI = (updates: Partial<UIState>) => {
