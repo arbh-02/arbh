@@ -4,8 +4,8 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { useApp } from "@/contexts/AppContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Download, Search, Loader2 } from "lucide-react";
-import { formatCurrency, formatDate, exportToCSV } from "@/lib/format";
+import { Plus, Download, Search, Loader2, MessageSquare } from "lucide-react";
+import { formatCurrency, formatDate, exportToCSV, getWhatsAppLink } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 import { NewLeadDialog } from "@/components/leads/NewLeadDialog";
 import { LeadDetailSheet } from "@/components/leads/LeadDetailSheet";
+import { useAuth } from "@/contexts/AuthContext";
 
 type Lead = Tables<'leads'>;
 type AppUser = Tables<'app_users'>;
@@ -21,6 +22,7 @@ const Leads = () => {
   const { ui, setUI } = useApp();
   const [isNewLeadOpen, setIsNewLeadOpen] = useState(false);
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
+  const { appUser } = useAuth();
 
   const { data: leads, isLoading: isLoadingLeads } = useQuery<Lead[]>({
     queryKey: ['leads'],
@@ -132,18 +134,19 @@ const Leads = () => {
                 <th className="text-left py-3 px-4 font-medium">Responsável</th>
                 <th className="text-left py-3 px-4 font-medium">Valor</th>
                 <th className="text-left py-3 px-4 font-medium">Criado em</th>
+                <th className="text-right py-3 px-4 font-medium">Ações</th>
               </tr>
             </thead>
             <tbody>
               {isLoadingLeads ? (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center">
+                  <td colSpan={7} className="py-8 text-center">
                     <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
                   </td>
                 </tr>
               ) : filteredLeads.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-muted-foreground">
+                  <td colSpan={7} className="py-8 text-center text-muted-foreground">
                     Nenhum lead encontrado
                   </td>
                 </tr>
@@ -165,6 +168,23 @@ const Leads = () => {
                     <td className="py-3 px-4">{usersMap.get(lead.responsavel_id as any)}</td>
                     <td className="py-3 px-4 font-semibold">{formatCurrency(lead.valor)}</td>
                     <td className="py-3 px-4 text-sm text-muted-foreground">{formatDate(lead.created_at)}</td>
+                    <td className="py-3 px-4 text-right">
+                      {lead.telefone && appUser && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const message = "Olá {nome}, tudo bem? Sou {vendedor} da Dr.lead.";
+                            const link = getWhatsAppLink(lead.telefone!, message, appUser.nome, lead.nome);
+                            window.open(link, "_blank");
+                          }}
+                        >
+                          <MessageSquare className="h-4 w-4 text-green-500" />
+                        </Button>
+                      )}
+                    </td>
                   </tr>
                 ))
               )}

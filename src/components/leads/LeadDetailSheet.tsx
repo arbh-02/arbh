@@ -11,13 +11,14 @@ import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
-import { Loader2, Edit, Trash2, User, Building, Mail, Phone, DollarSign, Tag, BarChart, Calendar } from "lucide-react";
-import { formatCurrency, formatDate } from "@/lib/format";
+import { Loader2, Edit, Trash2, User, Building, Mail, Phone, DollarSign, Tag, BarChart, Calendar, MessageSquare } from "lucide-react";
+import { formatCurrency, formatDate, getWhatsAppLink } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
 import { EditLeadDialog } from "./EditLeadDialog";
 import { DeleteLeadDialog } from "./DeleteLeadDialog";
 import { Separator } from "@/components/ui/separator";
 import { ActivityTimeline } from "./ActivityTimeline";
+import { useAuth } from "@/contexts/AuthContext";
 
 type Lead = Tables<'leads'>;
 type AppUser = Tables<'app_users'>;
@@ -41,6 +42,7 @@ const DetailRow = ({ icon: Icon, label, value }: { icon: React.ElementType, labe
 export const LeadDetailSheet = ({ leadId, open, onOpenChange }: LeadDetailSheetProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const { appUser } = useAuth();
 
   const { data: lead, isLoading, isError } = useQuery<Lead>({
     queryKey: ['lead', leadId],
@@ -103,7 +105,33 @@ export const LeadDetailSheet = ({ leadId, open, onOpenChange }: LeadDetailSheetP
               <div className="flex-1 overflow-y-auto pr-6 space-y-6 py-4">
                 <DetailRow icon={Building} label="Empresa" value={lead.empresa} />
                 <DetailRow icon={Mail} label="Email" value={lead.email} />
-                <DetailRow icon={Phone} label="Telefone" value={lead.telefone} />
+                <DetailRow 
+                  icon={Phone} 
+                  label="Telefone" 
+                  value={
+                    lead.telefone ? (
+                      <div className="flex items-center gap-2">
+                        <span>{lead.telefone}</span>
+                        {appUser && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={() => {
+                              const message = "Olá {nome}, tudo bem? Sou {vendedor} da Dr.lead.";
+                              const link = getWhatsAppLink(lead.telefone!, message, appUser.nome, lead.nome);
+                              window.open(link, "_blank");
+                            }}
+                          >
+                            <MessageSquare className="h-4 w-4 text-green-500" />
+                          </Button>
+                        )}
+                      </div>
+                    ) : (
+                      "Não informado"
+                    )
+                  } 
+                />
                 <DetailRow icon={DollarSign} label="Valor" value={formatCurrency(lead.valor)} />
                 <DetailRow icon={Tag} label="Origem" value={<Badge variant="outline">{lead.origem}</Badge>} />
                 <DetailRow icon={BarChart} label="Status" value={<Badge className={getStatusColor(lead.status)}>{lead.status}</Badge>} />
