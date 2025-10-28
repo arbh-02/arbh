@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Tables, Constants } from "@/integrations/supabase/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { NewLeadDialog } from "@/components/leads/NewLeadDialog";
+import { LeadDetailSheet } from "@/components/leads/LeadDetailSheet";
 
 type Lead = Tables<'leads'>;
 type LeadStatus = Tables<'leads'>['status'];
@@ -22,6 +23,7 @@ const Pipeline = () => {
   const queryClient = useQueryClient();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [isNewLeadOpen, setIsNewLeadOpen] = useState(false);
+  const [selectedLeadId, setSelectedLeadId] = useState<number | null>(null);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
@@ -54,6 +56,7 @@ const Pipeline = () => {
   };
 
   const handleDragStart = (event: DragStartEvent) => {
+    setSelectedLeadId(null); // Close sheet if open
     setActiveId(event.active.id as string);
   };
 
@@ -126,6 +129,7 @@ const Pipeline = () => {
                         key={lead.id}
                         id={String(lead.id)}
                         className="cursor-move hover:shadow-lg transition-shadow card-gradient border-border"
+                        onClick={() => setSelectedLeadId(lead.id)}
                       >
                         <CardContent className="p-4">
                           <div className="space-y-2">
@@ -163,6 +167,11 @@ const Pipeline = () => {
         </DndContext>
       )}
       <NewLeadDialog open={isNewLeadOpen} onOpenChange={setIsNewLeadOpen} />
+      <LeadDetailSheet
+        leadId={selectedLeadId}
+        open={!!selectedLeadId}
+        onOpenChange={(open) => !open && setSelectedLeadId(null)}
+      />
     </MainLayout>
   );
 };

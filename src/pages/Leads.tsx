@@ -12,6 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 import { NewLeadDialog } from "@/components/leads/NewLeadDialog";
+import { LeadDetailSheet } from "@/components/leads/LeadDetailSheet";
 
 type Lead = Tables<'leads'>;
 type AppUser = Tables<'app_users'>;
@@ -19,6 +20,7 @@ type AppUser = Tables<'app_users'>;
 const Leads = () => {
   const { ui, setUI } = useApp();
   const [isNewLeadOpen, setIsNewLeadOpen] = useState(false);
+  const [selectedLeadId, setSelectedLeadId] = useState<number | null>(null);
 
   const { data: leads, isLoading: isLoadingLeads } = useQuery<Lead[]>({
     queryKey: ['leads'],
@@ -150,6 +152,7 @@ const Leads = () => {
                   <tr 
                     key={lead.id} 
                     className="border-b border-border/50 hover:bg-muted/50 transition-colors cursor-pointer"
+                    onClick={() => setSelectedLeadId(lead.id)}
                   >
                     <td className="py-3 px-4">
                       <div className="font-medium">{lead.nome}</div>
@@ -170,6 +173,11 @@ const Leads = () => {
         </div>
       </div>
       <NewLeadDialog open={isNewLeadOpen} onOpenChange={setIsNewLeadOpen} />
+      <LeadDetailSheet
+        leadId={selectedLeadId}
+        open={!!selectedLeadId}
+        onOpenChange={(open) => !open && setSelectedLeadId(null)}
+      />
     </MainLayout>
   );
 };
