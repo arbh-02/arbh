@@ -11,6 +11,7 @@ import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { AuthGraphic } from "@/components/AuthGraphic";
 
 const signUpSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
@@ -101,102 +102,111 @@ const Auth = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md card-gradient border-border">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-3xl font-bold text-center text-primary">
-            Dr.lead
-          </CardTitle>
-          <CardDescription className="text-center">
-            Sistema de gestão comercial simplificado
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Entrar</TabsTrigger>
-              <TabsTrigger value="signup">Criar Conta</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="signin">
-              <form onSubmit={handleSubmitSignIn(handleSignIn)} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signin-email">Email</Label>
-                  <Input
-                    id="signin-email"
-                    type="email"
-                    placeholder="seu@email.com"
-                    {...registerSignIn("email")}
-                    disabled={loading}
-                  />
-                  {errorsSignIn.email && <p className="text-sm text-destructive">{errorsSignIn.email.message}</p>}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signin-password">Senha</Label>
-                  <Input
-                    id="signin-password"
-                    type="password"
-                    placeholder="••••••"
-                    {...registerSignIn("password")}
-                    disabled={loading}
-                  />
-                  {errorsSignIn.password && <p className="text-sm text-destructive">{errorsSignIn.password.message}</p>}
-                </div>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Entrar
-                </Button>
-              </form>
-            </TabsContent>
-            
-            <TabsContent value="signup">
-              <form onSubmit={handleSubmitSignUp(handleSignUp)} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signup-name">Nome Completo</Label>
-                  <Input
-                    id="signup-name"
-                    type="text"
-                    placeholder="Seu nome"
-                    {...registerSignUp("nome")}
-                    disabled={loading}
-                  />
-                  {errorsSignUp.nome && <p className="text-sm text-destructive">{errorsSignUp.nome.message}</p>}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
-                  <Input
-                    id="signup-email"
-                    type="email"
-                    placeholder="seu@email.com"
-                    {...registerSignUp("email")}
-                    disabled={loading}
-                  />
-                  {errorsSignUp.email && <p className="text-sm text-destructive">{errorsSignUp.email.message}</p>}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-password">Senha</Label>
-                  <Input
-                    id="signup-password"
-                    type="password"
-                    placeholder="••••••"
-                    {...registerSignUp("password")}
-                    disabled={loading}
-                  />
-                  {errorsSignUp.password && <p className="text-sm text-destructive">{errorsSignUp.password.message}</p>}
-                  <p className="text-xs text-muted-foreground">Mínimo 6 caracteres</p>
-                </div>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Criar Conta
-                </Button>
-                <p className="text-xs text-center text-muted-foreground">
-                  Sua conta será criada com status "pendente". Um administrador precisa aprovar seu acesso.
-                </p>
-              </form>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+    <div className="grid min-h-screen grid-cols-1 lg:grid-cols-2 bg-background">
+      <div className="hidden lg:flex flex-col items-center justify-center p-8 bg-zinc-900/50 border-r border-border text-center">
+        <AuthGraphic />
+        <h2 className="mt-8 text-3xl font-bold text-foreground">Potencialize suas Vendas</h2>
+        <p className="mt-2 text-muted-foreground">
+          Organize seus leads, gerencie seu pipeline e feche mais negócios com Dr.lead.
+        </p>
+      </div>
+      <div className="flex items-center justify-center p-4">
+        <Card className="w-full max-w-md card-gradient border-border">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-3xl font-bold text-center text-primary">
+              Dr.lead
+            </CardTitle>
+            <CardDescription className="text-center">
+              Sistema de gestão comercial simplificado
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="signin" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="signin">Entrar</TabsTrigger>
+                <TabsTrigger value="signup">Criar Conta</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="signin">
+                <form onSubmit={handleSubmitSignIn(handleSignIn)} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signin-email">Email</Label>
+                    <Input
+                      id="signin-email"
+                      type="email"
+                      placeholder="seu@email.com"
+                      {...registerSignIn("email")}
+                      disabled={loading}
+                    />
+                    {errorsSignIn.email && <p className="text-sm text-destructive">{errorsSignIn.email.message}</p>}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signin-password">Senha</Label>
+                    <Input
+                      id="signin-password"
+                      type="password"
+                      placeholder="••••••"
+                      {...registerSignIn("password")}
+                      disabled={loading}
+                    />
+                    {errorsSignIn.password && <p className="text-sm text-destructive">{errorsSignIn.password.message}</p>}
+                  </div>
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Entrar
+                  </Button>
+                </form>
+              </TabsContent>
+              
+              <TabsContent value="signup">
+                <form onSubmit={handleSubmitSignUp(handleSignUp)} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-name">Nome Completo</Label>
+                    <Input
+                      id="signup-name"
+                      type="text"
+                      placeholder="Seu nome"
+                      {...registerSignUp("nome")}
+                      disabled={loading}
+                    />
+                    {errorsSignUp.nome && <p className="text-sm text-destructive">{errorsSignUp.nome.message}</p>}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-email">Email</Label>
+                    <Input
+                      id="signup-email"
+                      type="email"
+                      placeholder="seu@email.com"
+                      {...registerSignUp("email")}
+                      disabled={loading}
+                    />
+                    {errorsSignUp.email && <p className="text-sm text-destructive">{errorsSignUp.email.message}</p>}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-password">Senha</Label>
+                    <Input
+                      id="signup-password"
+                      type="password"
+                      placeholder="••••••"
+                      {...registerSignUp("password")}
+                      disabled={loading}
+                    />
+                    {errorsSignUp.password && <p className="text-sm text-destructive">{errorsSignUp.password.message}</p>}
+                    <p className="text-xs text-muted-foreground">Mínimo 6 caracteres</p>
+                  </div>
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Criar Conta
+                  </Button>
+                  <p className="text-xs text-center text-muted-foreground">
+                    Sua conta será criada com status "pendente". Um administrador precisa aprovar seu acesso.
+                  </p>
+                </form>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
