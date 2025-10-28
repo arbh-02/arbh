@@ -14,6 +14,7 @@ import { Tables } from "@/integrations/supabase/types";
 import { NewLeadDialog } from "@/components/leads/NewLeadDialog";
 import { LeadDetailSheet } from "@/components/leads/LeadDetailSheet";
 import { useAuth } from "@/contexts/AuthContext";
+import { getLeadOriginLabel } from "@/lib/mapping";
 
 type Lead = Tables<'leads'>;
 type AppUser = Tables<'app_users'>;
@@ -70,7 +71,7 @@ const Leads = () => {
       Empresa: lead.empresa,
       Email: lead.email,
       Telefone: lead.telefone,
-      Origem: lead.origem,
+      Origem: getLeadOriginLabel(lead.origem),
       Status: lead.status,
       Responsavel: usersMap.get(lead.responsavel_id as any) || '',
       Valor: lead.valor,

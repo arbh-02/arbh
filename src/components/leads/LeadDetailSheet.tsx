@@ -19,6 +19,7 @@ import { DeleteLeadDialog } from "./DeleteLeadDialog";
 import { Separator } from "@/components/ui/separator";
 import { ActivityTimeline } from "./ActivityTimeline";
 import { useAuth } from "@/contexts/AuthContext";
+import { getLeadOriginLabel } from "@/lib/mapping";
 
 type Lead = Tables<'leads'>;
 type AppUser = Tables<'app_users'>;
@@ -133,7 +134,7 @@ export const LeadDetailSheet = ({ leadId, open, onOpenChange }: LeadDetailSheetP
                   } 
                 />
                 <DetailRow icon={DollarSign} label="Valor" value={formatCurrency(lead.valor)} />
-                <DetailRow icon={Tag} label="Origem" value={<Badge variant="outline">{lead.origem}</Badge>} />
+                <DetailRow icon={Tag} label="Origem" value={<Badge variant="outline">{getLeadOriginLabel(lead.origem)}</Badge>} />
                 <DetailRow icon={BarChart} label="Status" value={<Badge className={getStatusColor(lead.status)}>{lead.status}</Badge>} />
                 <DetailRow icon={User} label="Responsável" value={user?.nome} />
                 <DetailRow icon={Calendar} label="Criado em" value={formatDate(lead.created_at)} />

@@ -176,11 +176,11 @@ export type Database = {
       activity_type: "ligação" | "email" | "reunião" | "outro"
       app_role: "admin" | "vendedor" | "nenhum"
       lead_origin:
-        | "Formulário"
-        | "WhatsApp"
-        | "Redes Sociais"
-        | "Indicação"
-        | "Outros"
+        | "formulario"
+        | "whatsapp"
+        | "redes_sociais"
+        | "indicacao"
+        | "outros"
       lead_status: "Novo" | "Atendimento" | "Ganho" | "Perdido"
     }
     CompositeTypes: {
@@ -310,11 +310,11 @@ export const Constants = {
   public: {
     Enums: {
       lead_origin: [
-        "Formulário",
-        "WhatsApp",
-        "Redes Sociais",
-        "Indicação",
-        "Outros",
+        "formulario",
+        "whatsapp",
+        "redes_sociais",
+        "indicacao",
+        "outros",
       ],
       lead_status: ["Novo", "Atendimento", "Ganho", "Perdido"],
       app_role: ["admin", "vendedor", "nenhum"],

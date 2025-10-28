@@ -16,9 +16,10 @@ import * as z from "zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Tables, Constants } from "@/integrations/supabase/types";
+import { Tables } from "@/integrations/supabase/types";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { leadOriginOptions, leadOriginValues } from "@/lib/mapping";
 
 type AppUser = Tables<'app_users'>;
 
@@ -33,8 +34,8 @@ const formSchema = z.object({
   email: z.string().email("Email inválido").or(z.literal("")).optional(),
   telefone: z.string().optional(),
   valor: z.coerce.number().min(0, "Valor não pode ser negativo").default(0),
-  origem: z.enum(Constants.public.Enums.lead_origin),
-  status: z.enum(Constants.public.Enums.lead_status).default("Novo"),
+  origem: z.enum(leadOriginValues),
+  status: z.enum(["Novo", "Atendimento", "Ganho", "Perdido"]).default("Novo"),
   responsavel_id: z.string({ required_error: "Responsável é obrigatório" }).uuid("Responsável é obrigatório"),
 });
 
@@ -63,6 +64,7 @@ export const NewLeadDialog = ({ open, onOpenChange }: NewLeadDialogProps) => {
       telefone: "",
       valor: 0,
       status: "Novo",
+      origem: "outros",
     },
   });
 
@@ -174,8 +176,8 @@ export const NewLeadDialog = ({ open, onOpenChange }: NewLeadDialogProps) => {
                         <SelectValue placeholder="Selecione a origem" />
                       </SelectTrigger>
                       <SelectContent>
-                        {Constants.public.Enums.lead_origin.map(origin => (
-                          <SelectItem key={origin} value={origin}>{origin}</SelectItem>
+                        {leadOriginOptions.map(option => (
+                          <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -194,7 +196,7 @@ export const NewLeadDialog = ({ open, onOpenChange }: NewLeadDialogProps) => {
                         <SelectValue placeholder="Selecione o status" />
                       </SelectTrigger>
                       <SelectContent>
-                        {Constants.public.Enums.lead_status.map(status => (
+                        {["Novo", "Atendimento", "Ganho", "Perdido"].map(status => (
                           <SelectItem key={status} value={status}>{status}</SelectItem>
                         ))}
                       </SelectContent>

@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency, formatDateShort } from "@/lib/format";
 import { Tables } from "@/integrations/supabase/types";
+import { getLeadOriginLabel } from "@/lib/mapping";
 
 type Lead = Tables<'leads'>;
 
@@ -34,7 +35,7 @@ export const DraggableLeadCard = ({ lead, onClick }: DraggableLeadCardProps) => 
             <p className="text-lg font-bold text-primary">{formatCurrency(lead.valor)}</p>
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">{formatDateShort(lead.created_at)}</span>
-              <Badge variant="outline">{lead.origem}</Badge>
+              <Badge variant="outline">{getLeadOriginLabel(lead.origem)}</Badge>
             </div>
           </div>
         </CardContent>
