@@ -1,40 +1,56 @@
 import { useState } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { useApp } from "@/contexts/AppContext";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import { LeadStatus, LEAD_STATUSES } from "@/lib/mock-data";
+import { Plus, Loader2 } from "lucide-react";
 import { formatCurrency, formatDateShort } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
-import {
-  DndContext,
-  DragEndEvent,
-  DragOverlay,
-  DragStartEvent,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Tables, Constants } from "@/integrations/supabase/types";
+import { useAuth } from "@/contexts/AuthContext";
+import { NewLeadDialog } from "@/components/leads/NewLeadDialog";
+
+type Lead = Tables<'leads'>;
+type LeadStatus = Tables<'leads'>['status'];
 
 const Pipeline = () => {
-  const { leads, updateLead, getFilteredLeads, currentUser } = useApp();
+  const { appUser } = useAuth();
+  const queryClient = useQueryClient();
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [isNewLeadOpen, setIsNewLeadOpen] = useState(false);
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    })
-  );
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
-  const filteredLeads = getFilteredLeads();
+  const { data: leads, isLoading } = useQuery<Lead[]>({
+    queryKey: ['leads'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('leads').select('*').order('criado_em', { ascending: false });
+      if (error) throw new Error(error.message);
+      return data || [];
+    }
+  });
+
+  const updateLeadStatusMutation = useMutation({
+    mutationFn: async ({ leadId, newStatus }: { leadId: number, newStatus: LeadStatus }) => {
+      const { error } = await supabase.from('leads').update({ status: newStatus }).eq('id', leadId);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['leads'] });
+    },
+    onError: (error) => {
+      toast.error(`Erro ao mover lead: ${error.message}`);
+      queryClient.invalidateQueries({ queryKey: ['leads'] }); // Revert optimistic update on error
+    }
+  });
 
   const getLeadsByStatus = (status: LeadStatus) => {
-    return filteredLeads.filter(lead => lead.status === status);
+    if (!leads) return [];
+    return leads.filter(lead => lead.status === status);
   };
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -43,46 +59,34 @@ const Pipeline = () => {
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    
-    if (!over) {
-      setActiveId(null);
-      return;
-    }
-
-    const leadId = active.id as string;
-    const newStatus = over.id as LeadStatus;
-    const lead = leads.find(l => l.id === leadId);
-
-    if (!lead) {
-      setActiveId(null);
-      return;
-    }
-
-    // Check permissions for vendedor
-    if (currentUser.papel === "vendedor" && lead.responsavelId !== currentUser.id) {
-      toast.error("Você só pode mover seus próprios leads");
-      setActiveId(null);
-      return;
-    }
-
-    if (lead.status !== newStatus) {
-      updateLead(leadId, { status: newStatus });
-      
-      if (newStatus === "Ganho") {
-        toast.success(`Lead ${lead.nome} marcado como ganho!`, {
-          description: `Valor: ${formatCurrency(lead.valor)}`,
-        });
-      } else if (newStatus === "Perdido") {
-        toast.error(`Lead ${lead.nome} marcado como perdido`);
-      } else {
-        toast.info(`Lead ${lead.nome} movido para ${newStatus}`);
-      }
-    }
-
     setActiveId(null);
+    if (!over) return;
+
+    const leadId = Number(active.id);
+    const newStatus = over.id as LeadStatus;
+    const lead = leads?.find(l => l.id === leadId);
+
+    if (!lead || lead.status === newStatus) return;
+
+    if (appUser?.papel === "vendedor" && lead.responsavel_id !== appUser.id) {
+      toast.error("Você só pode mover seus próprios leads");
+      return;
+    }
+
+    updateLeadStatusMutation.mutate({ leadId, newStatus });
+
+    if (newStatus === "Ganho") {
+      toast.success(`Lead ${lead.nome} marcado como ganho!`, {
+        description: `Valor: ${formatCurrency(lead.valor)}`,
+      });
+    } else if (newStatus === "Perdido") {
+      toast.error(`Lead ${lead.nome} marcado como perdido`);
+    } else {
+      toast.info(`Lead ${lead.nome} movido para ${newStatus}`);
+    }
   };
 
-  const activeLead = activeId ? leads.find(l => l.id === activeId) : null;
+  const activeLead = activeId ? leads?.find(l => l.id === Number(activeId)) : null;
 
   return (
     <MainLayout>
@@ -90,90 +94,75 @@ const Pipeline = () => {
         title="Pipeline"
         description="Gestão visual do funil de vendas"
         actions={
-          <Button>
+          <Button onClick={() => setIsNewLeadOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
             Novo Lead
           </Button>
         }
       />
 
-      <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {LEAD_STATUSES.map(status => {
-            const statusLeads = getLeadsByStatus(status);
-            
-            return (
-              <div
-                key={status}
-                id={status}
-                className="flex flex-col rounded-lg border border-border bg-card p-4 min-h-[500px]"
-              >
-                <div className="mb-4 flex items-center justify-between">
-                  <h3 className="font-semibold">{status}</h3>
-                  <Badge variant="secondary">{statusLeads.length}</Badge>
-                </div>
-
-                <div className="space-y-3 flex-1">
-                  {statusLeads.length === 0 && (
-                    <p className="text-sm text-muted-foreground text-center py-8">
-                      Nenhum lead aqui ainda
-                    </p>
-                  )}
-                  
-                  {statusLeads.map(lead => (
-                    <Card
-                      key={lead.id}
-                      id={lead.id}
-                      className="cursor-move hover:shadow-lg transition-shadow card-gradient border-border"
-                      draggable
-                      onDragStart={(e) => {
-                        e.dataTransfer.effectAllowed = "move";
-                        e.dataTransfer.setData("text/html", e.currentTarget.outerHTML);
-                      }}
-                    >
-                      <CardContent className="p-4">
-                        <div className="space-y-2">
-                          <p className="font-medium">{lead.nome}</p>
-                          <p className="text-lg font-bold text-primary">
-                            {formatCurrency(lead.valor)}
-                          </p>
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-muted-foreground">
-                              {formatDateShort(lead.criadoEm)}
-                            </span>
-                            <Badge variant="outline">{lead.origem}</Badge>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
+      {isLoading ? (
+        <div className="flex justify-center items-center h-[500px]">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
         </div>
-
-        <DragOverlay>
-          {activeLead && (
-            <Card className="cursor-move shadow-2xl card-gradient border-border w-[300px]">
-              <CardContent className="p-4">
-                <div className="space-y-2">
-                  <p className="font-medium">{activeLead.nome}</p>
-                  <p className="text-lg font-bold text-primary">
-                    {formatCurrency(activeLead.valor)}
-                  </p>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">
-                      {formatDateShort(activeLead.criadoEm)}
-                    </span>
-                    <Badge variant="outline">{activeLead.origem}</Badge>
+      ) : (
+        <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {Constants.public.Enums.lead_status.map(status => {
+              const statusLeads = getLeadsByStatus(status);
+              return (
+                <div
+                  key={status}
+                  id={status}
+                  className="flex flex-col rounded-lg border border-border bg-card p-4 min-h-[500px]"
+                >
+                  <div className="mb-4 flex items-center justify-between">
+                    <h3 className="font-semibold">{status}</h3>
+                    <Badge variant="secondary">{statusLeads.length}</Badge>
+                  </div>
+                  <div className="space-y-3 flex-1">
+                    {statusLeads.map(lead => (
+                      <Card
+                        key={lead.id}
+                        id={String(lead.id)}
+                        className="cursor-move hover:shadow-lg transition-shadow card-gradient border-border"
+                      >
+                        <CardContent className="p-4">
+                          <div className="space-y-2">
+                            <p className="font-medium">{lead.nome}</p>
+                            <p className="text-lg font-bold text-primary">{formatCurrency(lead.valor)}</p>
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-muted-foreground">{formatDateShort(lead.criado_em)}</span>
+                              <Badge variant="outline">{lead.origem}</Badge>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          )}
-        </DragOverlay>
-      </DndContext>
+              );
+            })}
+          </div>
+          <DragOverlay>
+            {activeLead && (
+              <Card className="cursor-move shadow-2xl card-gradient border-border w-[300px]">
+                <CardContent className="p-4">
+                  <div className="space-y-2">
+                    <p className="font-medium">{activeLead.nome}</p>
+                    <p className="text-lg font-bold text-primary">{formatCurrency(activeLead.valor)}</p>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">{formatDateShort(activeLead.criado_em)}</span>
+                      <Badge variant="outline">{activeLead.origem}</Badge>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </DragOverlay>
+        </DndContext>
+      )}
+      <NewLeadDialog open={isNewLeadOpen} onOpenChange={setIsNewLeadOpen} />
     </MainLayout>
   );
 };

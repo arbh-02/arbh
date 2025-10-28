@@ -1,20 +1,66 @@
-import { useMemo } from "react";
+import { useState, useMemo } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { useApp } from "@/contexts/AppContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Download, Search } from "lucide-react";
+import { Plus, Download, Search, Loader2 } from "lucide-react";
 import { formatCurrency, formatDate, exportToCSV } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Tables } from "@/integrations/supabase/types";
+import { NewLeadDialog } from "@/components/leads/NewLeadDialog";
+
+type Lead = Tables<'leads'>;
+type AppUser = Tables<'app_users'>;
 
 const Leads = () => {
-  const { leads, ui, setUI, getFilteredLeads, getUserById } = useApp();
+  const { ui, setUI } = useApp();
+  const [isNewLeadOpen, setIsNewLeadOpen] = useState(false);
 
-  const filteredLeads = getFilteredLeads();
+  const { data: leads, isLoading: isLoadingLeads } = useQuery<Lead[]>({
+    queryKey: ['leads'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('leads').select('*').order('criado_em', { ascending: false });
+      if (error) throw new Error(error.message);
+      return data || [];
+    }
+  });
+
+  const { data: users } = useQuery<AppUser[]>({
+    queryKey: ['users'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('app_users').select('*');
+      if (error) throw new Error(error.message);
+      return data || [];
+    }
+  });
+
+  const usersMap = useMemo(() => {
+    if (!users) return new Map<number, string>();
+    return new Map(users.map(user => [user.id, user.nome]));
+  }, [users]);
+
+  const filteredLeads = useMemo(() => {
+    if (!leads) return [];
+    if (!ui.buscaLeads) return leads;
+    
+    const search = ui.buscaLeads.toLowerCase();
+    return leads.filter(l => 
+      l.nome.toLowerCase().includes(search) ||
+      (l.empresa && l.empresa.toLowerCase().includes(search)) ||
+      (l.email && l.email.toLowerCase().includes(search)) ||
+      (l.telefone && l.telefone.includes(search))
+    );
+  }, [leads, ui.buscaLeads]);
 
   const handleExportCSV = () => {
+    if (!filteredLeads || filteredLeads.length === 0) {
+      toast.warning("Não há dados para exportar.");
+      return;
+    }
     const exportData = filteredLeads.map(lead => ({
       Nome: lead.nome,
       Empresa: lead.empresa,
@@ -22,9 +68,9 @@ const Leads = () => {
       Telefone: lead.telefone,
       Origem: lead.origem,
       Status: lead.status,
-      Responsavel: getUserById(lead.responsavelId)?.nome || '',
+      Responsavel: usersMap.get(lead.responsavel_id) || '',
       Valor: lead.valor,
-      'Criado Em': formatDate(lead.criadoEm),
+      'Criado Em': formatDate(lead.criado_em),
     }));
 
     exportToCSV(exportData, 'leads_export');
@@ -52,7 +98,7 @@ const Leads = () => {
               <Download className="mr-2 h-4 w-4" />
               Exportar CSV
             </Button>
-            <Button>
+            <Button onClick={() => setIsNewLeadOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
               Novo Lead
             </Button>
@@ -80,9 +126,6 @@ const Leads = () => {
               <tr className="border-b border-border">
                 <th className="text-left py-3 px-4 font-medium">Nome</th>
                 <th className="text-left py-3 px-4 font-medium">Empresa</th>
-                <th className="text-left py-3 px-4 font-medium">Email</th>
-                <th className="text-left py-3 px-4 font-medium">Telefone</th>
-                <th className="text-left py-3 px-4 font-medium">Origem</th>
                 <th className="text-left py-3 px-4 font-medium">Status</th>
                 <th className="text-left py-3 px-4 font-medium">Responsável</th>
                 <th className="text-left py-3 px-4 font-medium">Valor</th>
@@ -90,10 +133,16 @@ const Leads = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredLeads.length === 0 ? (
+              {isLoadingLeads ? (
                 <tr>
-                  <td colSpan={9} className="py-8 text-center text-muted-foreground">
-                    Nenhum lead corresponde à sua busca
+                  <td colSpan={6} className="py-8 text-center">
+                    <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
+                  </td>
+                </tr>
+              ) : filteredLeads.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-8 text-center text-muted-foreground">
+                    Nenhum lead encontrado
                   </td>
                 </tr>
               ) : (
@@ -102,19 +151,17 @@ const Leads = () => {
                     key={lead.id} 
                     className="border-b border-border/50 hover:bg-muted/50 transition-colors cursor-pointer"
                   >
-                    <td className="py-3 px-4 font-medium">{lead.nome}</td>
-                    <td className="py-3 px-4">{lead.empresa}</td>
-                    <td className="py-3 px-4 text-sm text-muted-foreground">{lead.email}</td>
-                    <td className="py-3 px-4 text-sm">{lead.telefone}</td>
                     <td className="py-3 px-4">
-                      <Badge variant="outline">{lead.origem}</Badge>
+                      <div className="font-medium">{lead.nome}</div>
+                      <div className="text-sm text-muted-foreground">{lead.email}</div>
                     </td>
+                    <td className="py-3 px-4">{lead.empresa}</td>
                     <td className="py-3 px-4">
                       <Badge className={getStatusColor(lead.status)}>{lead.status}</Badge>
                     </td>
-                    <td className="py-3 px-4">{getUserById(lead.responsavelId)?.nome}</td>
+                    <td className="py-3 px-4">{usersMap.get(lead.responsavel_id)}</td>
                     <td className="py-3 px-4 font-semibold">{formatCurrency(lead.valor)}</td>
-                    <td className="py-3 px-4 text-sm text-muted-foreground">{formatDate(lead.criadoEm)}</td>
+                    <td className="py-3 px-4 text-sm text-muted-foreground">{formatDate(lead.criado_em)}</td>
                   </tr>
                 ))
               )}
@@ -122,6 +169,7 @@ const Leads = () => {
           </table>
         </div>
       </div>
+      <NewLeadDialog open={isNewLeadOpen} onOpenChange={setIsNewLeadOpen} />
     </MainLayout>
   );
 };

@@ -7,15 +7,39 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { formatCurrency } from "@/lib/format";
 import { getDateRangeForPeriod, isDateInRange } from "@/lib/date-utils";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { TrendingUp, Users, Trophy, DollarSign } from "lucide-react";
-import { Lead } from "@/lib/mock-data";
+import { TrendingUp, Users, Trophy, DollarSign, Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Tables } from "@/integrations/supabase/types";
+
+type Lead = Tables<'leads'>;
+type AppUser = Tables<'app_users'>;
 
 const Dashboard = () => {
-  const { leads, users, ui, setUI } = useApp();
+  const { ui, setUI } = useApp();
+
+  const { data: leads, isLoading: isLoadingLeads } = useQuery<Lead[]>({
+    queryKey: ['leads'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('leads').select('*');
+      if (error) throw new Error(error.message);
+      return data || [];
+    }
+  });
+
+  const { data: users, isLoading: isLoadingUsers } = useQuery<AppUser[]>({
+    queryKey: ['users'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('app_users').select('*');
+      if (error) throw new Error(error.message);
+      return data || [];
+    }
+  });
 
   const filteredLeads = useMemo(() => {
+    if (!leads) return [];
     const { start, end } = getDateRangeForPeriod(ui.periodo);
-    return leads.filter(lead => isDateInRange(lead.criadoEm, start, end));
+    return leads.filter(lead => isDateInRange(lead.criado_em, start, end));
   }, [leads, ui.periodo]);
 
   const kpis = useMemo(() => {
@@ -33,7 +57,7 @@ const Dashboard = () => {
     const dataMap = new Map<string, { dia: string; leadsCount: number; valorGanho: number }>();
     
     filteredLeads.forEach(lead => {
-      const date = new Date(lead.criadoEm);
+      const date = new Date(lead.criado_em);
       const dayKey = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}`;
       
       if (!dataMap.has(dayKey)) {
@@ -73,10 +97,11 @@ const Dashboard = () => {
   }, [filteredLeads]);
 
   const performanceByVendedor = useMemo(() => {
+    if (!users) return [];
     const vendedores = users.filter(u => u.papel === "vendedor");
     
     return vendedores.map(vendedor => {
-      const vendedorLeads = filteredLeads.filter(l => l.responsavelId === vendedor.id);
+      const vendedorLeads = filteredLeads.filter(l => l.responsavel_id === vendedor.id);
       const ganhos = vendedorLeads.filter(l => l.status === "Ganho");
       const valorGanho = ganhos.reduce((sum, l) => sum + l.valor, 0);
       const conversao = vendedorLeads.length > 0 ? (ganhos.length / vendedorLeads.length) * 100 : 0;
@@ -90,6 +115,16 @@ const Dashboard = () => {
       };
     }).sort((a, b) => b.valorGanho - a.valorGanho);
   }, [filteredLeads, users]);
+
+  if (isLoadingLeads || isLoadingUsers) {
+    return (
+      <MainLayout>
+        <div className="flex justify-center items-center h-screen">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout>
