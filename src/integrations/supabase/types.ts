@@ -181,7 +181,7 @@ export type Database = {
         | "redes_sociais"
         | "indicacao"
         | "outros"
-      lead_status: "Novo" | "Atendimento" | "Ganho" | "Perdido"
+      lead_status: "novo" | "atendimento" | "ganho" | "perdido"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -316,7 +316,7 @@ export const Constants = {
         "indicacao",
         "outros",
       ],
-      lead_status: ["Novo", "Atendimento", "Ganho", "Perdido"],
+      lead_status: ["novo", "atendimento", "ganho", "perdido"],
       app_role: ["admin", "vendedor", "nenhum"],
     },
   },

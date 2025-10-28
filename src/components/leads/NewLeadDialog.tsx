@@ -19,7 +19,7 @@ import { toast } from "sonner";
 import { Tables } from "@/integrations/supabase/types";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { leadOriginOptions, leadOriginValues } from "@/lib/mapping";
+import { leadOriginOptions, leadOriginValues, leadStatusOptions, leadStatusValues } from "@/lib/mapping";
 
 type AppUser = Tables<'app_users'>;
 
@@ -35,7 +35,7 @@ const formSchema = z.object({
   telefone: z.string().optional(),
   valor: z.coerce.number().min(0, "Valor não pode ser negativo").default(0),
   origem: z.enum(leadOriginValues),
-  status: z.enum(["Novo", "Atendimento", "Ganho", "Perdido"]).default("Novo"),
+  status: z.enum(leadStatusValues).default("novo"),
   responsavel_id: z.string({ required_error: "Responsável é obrigatório" }).uuid("Responsável é obrigatório"),
 });
 
@@ -63,7 +63,7 @@ export const NewLeadDialog = ({ open, onOpenChange }: NewLeadDialogProps) => {
       email: "",
       telefone: "",
       valor: 0,
-      status: "Novo",
+      status: "novo",
       origem: "outros",
     },
   });
@@ -196,8 +196,8 @@ export const NewLeadDialog = ({ open, onOpenChange }: NewLeadDialogProps) => {
                         <SelectValue placeholder="Selecione o status" />
                       </SelectTrigger>
                       <SelectContent>
-                        {["Novo", "Atendimento", "Ganho", "Perdido"].map(status => (
-                          <SelectItem key={status} value={status}>{status}</SelectItem>
+                        {leadStatusOptions.map(option => (
+                          <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>

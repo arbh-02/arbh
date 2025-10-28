@@ -16,6 +16,7 @@ import { NewLeadDialog } from "@/components/leads/NewLeadDialog";
 import { LeadDetailSheet } from "@/components/leads/LeadDetailSheet";
 import { DroppableColumn } from "@/components/pipeline/DroppableColumn";
 import { DraggableLeadCard } from "@/components/pipeline/DraggableLeadCard";
+import { getLeadStatusLabel } from "@/lib/mapping";
 
 type Lead = Tables<'leads'>;
 type LeadStatus = Tables<'leads'>['status'];
@@ -32,7 +33,7 @@ const Pipeline = () => {
   const { data: leads, isLoading } = useQuery<Lead[]>({
     queryKey: ['leads'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('leads').select('*').order('criado_em', { ascending: false });
+      const { data, error } = await supabase.from('leads').select('*').order('created_at', { ascending: false });
       if (error) throw new Error(error.message);
       return data || [];
     }
@@ -80,14 +81,15 @@ const Pipeline = () => {
 
     updateLeadStatusMutation.mutate({ leadId, newStatus });
 
-    if (newStatus === "Ganho") {
+    const statusLabel = getLeadStatusLabel(newStatus);
+    if (newStatus === "ganho") {
       toast.success(`Lead ${lead.nome} marcado como ganho!`, {
         description: `Valor: ${formatCurrency(lead.valor)}`,
       });
-    } else if (newStatus === "Perdido") {
+    } else if (newStatus === "perdido") {
       toast.error(`Lead ${lead.nome} marcado como perdido`);
     } else {
-      toast.info(`Lead ${lead.nome} movido para ${newStatus}`);
+      toast.info(`Lead ${lead.nome} movido para ${statusLabel}`);
     }
   };
 
@@ -116,7 +118,7 @@ const Pipeline = () => {
             {Constants.public.Enums.lead_status.map(status => {
               const statusLeads = getLeadsByStatus(status);
               return (
-                <DroppableColumn key={status} id={status} title={status} count={statusLeads.length}>
+                <DroppableColumn key={status} id={status} title={getLeadStatusLabel(status) || ''} count={statusLeads.length}>
                   {statusLeads.map(lead => (
                     <DraggableLeadCard
                       key={lead.id}
@@ -136,7 +138,7 @@ const Pipeline = () => {
                     <p className="font-medium">{activeLead.nome}</p>
                     <p className="text-lg font-bold text-primary">{formatCurrency(activeLead.valor)}</p>
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">{formatDateShort(activeLead.criado_em)}</span>
+                      <span className="text-muted-foreground">{formatDateShort(activeLead.created_at)}</span>
                       <Badge variant="outline">{activeLead.origem}</Badge>
                     </div>
                   </div>

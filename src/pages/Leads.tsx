@@ -14,7 +14,7 @@ import { Tables } from "@/integrations/supabase/types";
 import { NewLeadDialog } from "@/components/leads/NewLeadDialog";
 import { LeadDetailSheet } from "@/components/leads/LeadDetailSheet";
 import { useAuth } from "@/contexts/AuthContext";
-import { getLeadOriginLabel } from "@/lib/mapping";
+import { getLeadOriginLabel, getLeadStatusLabel } from "@/lib/mapping";
 
 type Lead = Tables<'leads'>;
 type AppUser = Tables<'app_users'>;
@@ -72,7 +72,7 @@ const Leads = () => {
       Email: lead.email,
       Telefone: lead.telefone,
       Origem: getLeadOriginLabel(lead.origem),
-      Status: lead.status,
+      Status: getLeadStatusLabel(lead.status),
       Responsavel: usersMap.get(lead.responsavel_id as any) || '',
       Valor: lead.valor,
       'Criado Em': formatDate(lead.created_at),
@@ -84,10 +84,10 @@ const Leads = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "Novo": return "bg-blue-500/20 text-blue-300 border-blue-500/50";
-      case "Atendimento": return "bg-yellow-500/20 text-yellow-300 border-yellow-500/50";
-      case "Ganho": return "bg-green-500/20 text-green-300 border-green-500/50";
-      case "Perdido": return "bg-red-500/20 text-red-300 border-red-500/50";
+      case "novo": return "bg-blue-500/20 text-blue-300 border-blue-500/50";
+      case "atendimento": return "bg-yellow-500/20 text-yellow-300 border-yellow-500/50";
+      case "ganho": return "bg-green-500/20 text-green-300 border-green-500/50";
+      case "perdido": return "bg-red-500/20 text-red-300 border-red-500/50";
       default: return "";
     }
   };
@@ -164,7 +164,7 @@ const Leads = () => {
                     </td>
                     <td className="py-3 px-4">{lead.empresa}</td>
                     <td className="py-3 px-4">
-                      <Badge className={getStatusColor(lead.status)}>{lead.status}</Badge>
+                      <Badge className={getStatusColor(lead.status)}>{getLeadStatusLabel(lead.status)}</Badge>
                     </td>
                     <td className="py-3 px-4">{usersMap.get(lead.responsavel_id as any)}</td>
                     <td className="py-3 px-4 font-semibold">{formatCurrency(lead.valor)}</td>

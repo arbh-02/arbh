@@ -18,7 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Tables } from "@/integrations/supabase/types";
 import { Loader2 } from "lucide-react";
-import { leadOriginOptions, leadOriginValues } from "@/lib/mapping";
+import { leadOriginOptions, leadOriginValues, leadStatusOptions, leadStatusValues } from "@/lib/mapping";
 
 type Lead = Tables<'leads'>;
 type AppUser = Tables<'app_users'>;
@@ -36,7 +36,7 @@ const formSchema = z.object({
   telefone: z.string().optional(),
   valor: z.coerce.number().min(0, "Valor não pode ser negativo").default(0),
   origem: z.enum(leadOriginValues),
-  status: z.enum(["Novo", "Atendimento", "Ganho", "Perdido"]),
+  status: z.enum(leadStatusValues),
   responsavel_id: z.string({ required_error: "Responsável é obrigatório" }).uuid("Responsável é obrigatório"),
 });
 
@@ -189,8 +189,8 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
                         <SelectValue placeholder="Selecione o status" />
                       </SelectTrigger>
                       <SelectContent>
-                        {["Novo", "Atendimento", "Ganho", "Perdido"].map(status => (
-                          <SelectItem key={status} value={status}>{status}</SelectItem>
+                        {leadStatusOptions.map(option => (
+                          <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>

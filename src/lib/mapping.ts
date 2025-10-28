@@ -14,3 +14,19 @@ export const getLeadOriginLabel = (value: string | null | undefined) => {
   if (!value) return '';
   return leadOriginOptions.find(option => option.value === value)?.label || value;
 };
+
+export const leadStatusOptions = [
+  { value: 'novo', label: 'Novo' },
+  { value: 'atendimento', label: 'Atendimento' },
+  { value: 'ganho', label: 'Ganho' },
+  { value: 'perdido', label: 'Perdido' },
+] as const;
+
+export type LeadStatusValue = typeof leadStatusOptions[number]['value'];
+
+export const leadStatusValues = leadStatusOptions.map(option => option.value) as [LeadStatusValue, ...LeadStatusValue[]];
+
+export const getLeadStatusLabel = (value: string | null | undefined) => {
+  if (!value) return '';
+  return leadStatusOptions.find(option => option.value === value)?.label || value;
+};

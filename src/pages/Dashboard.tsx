@@ -44,9 +44,9 @@ const Dashboard = () => {
 
   const kpis = useMemo(() => {
     const totalLeads = filteredLeads.length;
-    const negociosGanhos = filteredLeads.filter(l => l.status === "Ganho").length;
+    const negociosGanhos = filteredLeads.filter(l => l.status === "ganho").length;
     const valorGanho = filteredLeads
-      .filter(l => l.status === "Ganho")
+      .filter(l => l.status === "ganho")
       .reduce((sum, l) => sum + l.valor, 0);
     const taxaConversao = totalLeads > 0 ? (negociosGanhos / totalLeads) * 100 : 0;
 
@@ -66,7 +66,7 @@ const Dashboard = () => {
       
       const entry = dataMap.get(dayKey)!;
       entry.leadsCount++;
-      if (lead.status === "Ganho") {
+      if (lead.status === "ganho") {
         entry.valorGanho += lead.valor;
       }
     });
@@ -88,7 +88,7 @@ const Dashboard = () => {
       
       const entry = dataMap.get(lead.origem)!;
       entry.totalLeads++;
-      if (lead.status === "Ganho") {
+      if (lead.status === "ganho") {
         entry.valorGanho += lead.valor;
       }
     });
@@ -102,7 +102,7 @@ const Dashboard = () => {
     
     return vendedores.map(vendedor => {
       const vendedorLeads = filteredLeads.filter(l => l.responsavel_id === vendedor.id);
-      const ganhos = vendedorLeads.filter(l => l.status === "Ganho");
+      const ganhos = vendedorLeads.filter(l => l.status === "ganho");
       const valorGanho = ganhos.reduce((sum, l) => sum + l.valor, 0);
       const conversao = vendedorLeads.length > 0 ? (ganhos.length / vendedorLeads.length) * 100 : 0;
 

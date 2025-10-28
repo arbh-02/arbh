@@ -19,7 +19,7 @@ import { DeleteLeadDialog } from "./DeleteLeadDialog";
 import { Separator } from "@/components/ui/separator";
 import { ActivityTimeline } from "./ActivityTimeline";
 import { useAuth } from "@/contexts/AuthContext";
-import { getLeadOriginLabel } from "@/lib/mapping";
+import { getLeadOriginLabel, getLeadStatusLabel } from "@/lib/mapping";
 
 type Lead = Tables<'leads'>;
 type AppUser = Tables<'app_users'>;
@@ -69,10 +69,10 @@ export const LeadDetailSheet = ({ leadId, open, onOpenChange }: LeadDetailSheetP
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "Novo": return "bg-blue-500/20 text-blue-300 border-blue-500/50";
-      case "Atendimento": return "bg-yellow-500/20 text-yellow-300 border-yellow-500/50";
-      case "Ganho": return "bg-green-500/20 text-green-300 border-green-500/50";
-      case "Perdido": return "bg-red-500/20 text-red-300 border-red-500/50";
+      case "novo": return "bg-blue-500/20 text-blue-300 border-blue-500/50";
+      case "atendimento": return "bg-yellow-500/20 text-yellow-300 border-yellow-500/50";
+      case "ganho": return "bg-green-500/20 text-green-300 border-green-500/50";
+      case "perdido": return "bg-red-500/20 text-red-300 border-red-500/50";
       default: return "";
     }
   };
@@ -135,7 +135,7 @@ export const LeadDetailSheet = ({ leadId, open, onOpenChange }: LeadDetailSheetP
                 />
                 <DetailRow icon={DollarSign} label="Valor" value={formatCurrency(lead.valor)} />
                 <DetailRow icon={Tag} label="Origem" value={<Badge variant="outline">{getLeadOriginLabel(lead.origem)}</Badge>} />
-                <DetailRow icon={BarChart} label="Status" value={<Badge className={getStatusColor(lead.status)}>{lead.status}</Badge>} />
+                <DetailRow icon={BarChart} label="Status" value={<Badge className={getStatusColor(lead.status)}>{getLeadStatusLabel(lead.status)}</Badge>} />
                 <DetailRow icon={User} label="Responsável" value={user?.nome} />
                 <DetailRow icon={Calendar} label="Criado em" value={formatDate(lead.created_at)} />
                 <Separator />
