@@ -7,12 +7,11 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 
 interface AppUser {
-  id: number;
-  auth_uid: string;
+  id: string; // UUID from Supabase auth
   nome: string;
   email: string;
   papel: "admin" | "vendedor" | "nenhum";
-  criado_em: string;
+  created_at: string;
 }
 
 interface AuthContextType {
@@ -34,28 +33,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         setSession(session);
-        setUser(session?.user ?? null);
+        const currentUser = session?.user ?? null;
+        setUser(currentUser);
 
-        if (session?.user) {
-          // Fetch app user profile
-          await fetchAppUser(session.user.id);
+        if (currentUser) {
+          await fetchAppUser(currentUser.id);
         } else {
           setAppUser(null);
+          setLoading(false);
         }
       }
     );
 
-    // Then check for existing session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
-      setUser(session?.user ?? null);
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
       
-      if (session?.user) {
-        await fetchAppUser(session.user.id);
+      if (currentUser) {
+        await fetchAppUser(currentUser.id);
       }
       
       setLoading(false);
@@ -69,26 +68,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const { data, error } = await supabase
         .from('app_users')
         .select('*')
-        .eq('auth_uid', authUid)
+        .eq('id', authUid) // Corrected to query by 'id'
         .single();
 
       if (error) {
-        console.error("Error fetching app user:", error);
+        console.error("Error fetching app user:", error.message);
+        setAppUser(null); // Clear app user on error
         return;
       }
 
       if (data) {
         setAppUser(data as AppUser);
-        
-        // Check if user has "nenhum" role
         if (data.papel === 'nenhum') {
           setShowPendingModal(true);
         } else {
           setShowPendingModal(false);
         }
+      } else {
+        setAppUser(null);
       }
     } catch (error) {
-      console.error("Error in fetchAppUser:", error);
+      console.error("Exception in fetchAppUser:", error);
+      setAppUser(null);
     }
   };
 
@@ -99,7 +100,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     navigate("/auth");
   };
 
-  // Show pending approval modal
   if (showPendingModal && appUser?.papel === 'nenhum') {
     return (
       <Dialog open={showPendingModal} onOpenChange={() => {}}>

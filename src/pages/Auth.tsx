@@ -48,17 +48,9 @@ const Auth = () => {
       }
 
       if (data.user) {
-        // Initialize user profile
-        const { error: rpcError } = await supabase.rpc('init_current_user', {
-          p_nome: signUpData.nome,
-          p_email: signUpData.email,
-        });
-
-        if (rpcError) {
-          console.error("Error initializing user:", rpcError);
-        }
-
-        toast.success("Conta criada com sucesso!");
+        toast.success("Conta criada com sucesso! Verifique seu e-mail para confirmação.");
+        // A trigger no Supabase cuidará da criação do perfil do usuário.
+        // O usuário será redirecionado após a confirmação do e-mail ou no próximo login.
         navigate("/dashboard");
       }
     } catch (error: any) {
