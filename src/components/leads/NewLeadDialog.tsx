@@ -108,7 +108,7 @@ export const NewLeadDialog = ({ open, onOpenChange }: NewLeadDialogProps) => {
           <DialogDescription>Preencha as informações do novo lead.</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="nome">Nome</Label>
               <Input id="nome" {...register("nome")} />
@@ -119,7 +119,7 @@ export const NewLeadDialog = ({ open, onOpenChange }: NewLeadDialogProps) => {
               <Input id="empresa" {...register("empresa")} />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input id="email" type="email" {...register("email")} />
@@ -130,7 +130,7 @@ export const NewLeadDialog = ({ open, onOpenChange }: NewLeadDialogProps) => {
               <Input id="telefone" {...register("telefone")} />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="valor">Valor (R$)</Label>
               <Input id="valor" type="number" step="0.01" {...register("valor")} />
@@ -157,7 +157,7 @@ export const NewLeadDialog = ({ open, onOpenChange }: NewLeadDialogProps) => {
               {errors.responsavel_id && <p className="text-sm text-destructive">{errors.responsavel_id.message}</p>}
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="origem">Origem</Label>
               <Controller
