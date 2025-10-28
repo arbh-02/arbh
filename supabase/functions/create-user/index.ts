@@ -39,10 +39,11 @@ serve(async (req) => {
     // Agora, atualizamos para o papel que o administrador especificou.
     const newUserId = authData.user.id;
 
+    // Corrigido: a coluna para o ID do usuário é 'id', não 'auth_uid'.
     const { error: roleError } = await supabaseAdmin
       .from("app_users")
       .update({ papel })
-      .eq("auth_uid", newUserId);
+      .eq("id", newUserId);
 
     if (roleError) {
       // Se a atualização do papel falhar, desfaz a criação do usuário para evitar inconsistências.
