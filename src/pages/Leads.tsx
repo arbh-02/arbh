@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { useApp } from "@/contexts/AppContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Download, Search, Loader2, MessageSquare } from "lucide-react";
+import { Plus, Download, Search, Loader2, MessageSquare, Edit, Trash2 } from "lucide-react";
 import { formatCurrency, formatDate, exportToCSV, getWhatsAppLink } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -15,6 +15,8 @@ import { NewLeadDialog } from "@/components/leads/NewLeadDialog";
 import { LeadDetailSheet } from "@/components/leads/LeadDetailSheet";
 import { useAuth } from "@/contexts/AuthContext";
 import { getLeadOriginLabel, getLeadStatusLabel } from "@/lib/mapping";
+import { EditLeadDialog } from "@/components/leads/EditLeadDialog";
+import { DeleteLeadDialog } from "@/components/leads/DeleteLeadDialog";
 
 type Lead = Tables<'leads'>;
 type AppUser = Tables<'app_users'>;
@@ -23,6 +25,8 @@ const Leads = () => {
   const { ui, setUI } = useApp();
   const [isNewLeadOpen, setIsNewLeadOpen] = useState(false);
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
+  const [editingLead, setEditingLead] = useState<Lead | null>(null);
+  const [deletingLead, setDeletingLead] = useState<Lead | null>(null);
   const { appUser } = useAuth();
 
   const { data: leads, isLoading: isLoadingLeads } = useQuery<Lead[]>({
@@ -170,21 +174,45 @@ const Leads = () => {
                     <td className="py-3 px-4 font-semibold">{formatCurrency(lead.valor)}</td>
                     <td className="py-3 px-4 text-sm text-muted-foreground">{formatDate(lead.created_at)}</td>
                     <td className="py-3 px-4 text-right">
-                      {lead.telefone && appUser && (
+                      <div className="flex items-center justify-end gap-1">
+                        {lead.telefone && appUser && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const message = "Olá {nome}, tudo bem? Sou {vendedor} da Dr.lead.";
+                              const link = getWhatsAppLink(lead.telefone!, message, appUser.nome, lead.nome);
+                              window.open(link, "_blank");
+                            }}
+                          >
+                            <MessageSquare className="h-4 w-4 text-green-500" />
+                          </Button>
+                        )}
                         <Button
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8"
                           onClick={(e) => {
                             e.stopPropagation();
-                            const message = "Olá {nome}, tudo bem? Sou {vendedor} da Dr.lead.";
-                            const link = getWhatsAppLink(lead.telefone!, message, appUser.nome, lead.nome);
-                            window.open(link, "_blank");
+                            setEditingLead(lead);
                           }}
                         >
-                          <MessageSquare className="h-4 w-4 text-green-500" />
+                          <Edit className="h-4 w-4" />
                         </Button>
-                      )}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeletingLead(lead);
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -199,6 +227,20 @@ const Leads = () => {
         open={!!selectedLeadId}
         onOpenChange={(open) => !open && setSelectedLeadId(null)}
       />
+      {editingLead && (
+        <EditLeadDialog
+          lead={editingLead}
+          open={!!editingLead}
+          onOpenChange={(open) => !open && setEditingLead(null)}
+        />
+      )}
+      {deletingLead && (
+        <DeleteLeadDialog
+          leadId={deletingLead.id as any}
+          open={!!deletingLead}
+          onOpenChange={(open) => !open && setDeletingLead(null)}
+        />
+      )}
     </MainLayout>
   );
 };
