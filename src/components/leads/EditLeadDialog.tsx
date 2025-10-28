@@ -105,108 +105,110 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
           <DialogTitle>Editar Lead</DialogTitle>
           <DialogDescription>Atualize as informações do lead.</DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="nome">Nome</Label>
-              <Input id="nome" {...register("nome")} />
-              {errors.nome && <p className="text-sm text-destructive">{errors.nome.message}</p>}
+        <div className="max-h-[75vh] overflow-y-auto pr-4">
+          <form id="edit-lead-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="nome">Nome</Label>
+                <Input id="nome" {...register("nome")} />
+                {errors.nome && <p className="text-sm text-destructive">{errors.nome.message}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="empresa">Empresa</Label>
+                <Input id="empresa" {...register("empresa")} />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="empresa">Empresa</Label>
-              <Input id="empresa" {...register("empresa")} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" type="email" {...register("email")} />
+                {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="telefone">Telefone</Label>
+                <Input id="telefone" {...register("telefone")} />
+              </div>
             </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" {...register("email")} />
-              {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="valor">Valor (R$)</Label>
+                <Input id="valor" type="number" step="0.01" {...register("valor")} />
+                {errors.valor && <p className="text-sm text-destructive">{errors.valor.message}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="responsavel_id">Responsável</Label>
+                <Controller
+                  control={control}
+                  name="responsavel_id"
+                  render={({ field }) => (
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <SelectTrigger disabled={isLoadingUsers}>
+                        <SelectValue placeholder="Selecione um responsável" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {users?.map(user => (
+                          <SelectItem key={user.id} value={user.id as any}>{user.nome}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                {errors.responsavel_id && <p className="text-sm text-destructive">{errors.responsavel_id.message}</p>}
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="telefone">Telefone</Label>
-              <Input id="telefone" {...register("telefone")} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="origem">Origem</Label>
+                <Controller
+                  control={control}
+                  name="origem"
+                  render={({ field }) => (
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione a origem" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Constants.public.Enums.lead_origin.map(origin => (
+                          <SelectItem key={origin} value={origin}>{origin}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                {errors.origem && <p className="text-sm text-destructive">{errors.origem.message}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="status">Status</Label>
+                <Controller
+                  control={control}
+                  name="status"
+                  render={({ field }) => (
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Constants.public.Enums.lead_status.map(status => (
+                          <SelectItem key={status} value={status}>{status}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                {errors.status && <p className="text-sm text-destructive">{errors.status.message}</p>}
+              </div>
             </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="valor">Valor (R$)</Label>
-              <Input id="valor" type="number" step="0.01" {...register("valor")} />
-              {errors.valor && <p className="text-sm text-destructive">{errors.valor.message}</p>}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="responsavel_id">Responsável</Label>
-              <Controller
-                control={control}
-                name="responsavel_id"
-                render={({ field }) => (
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <SelectTrigger disabled={isLoadingUsers}>
-                      <SelectValue placeholder="Selecione um responsável" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {users?.map(user => (
-                        <SelectItem key={user.id} value={user.id as any}>{user.nome}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-              {errors.responsavel_id && <p className="text-sm text-destructive">{errors.responsavel_id.message}</p>}
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="origem">Origem</Label>
-              <Controller
-                control={control}
-                name="origem"
-                render={({ field }) => (
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione a origem" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Constants.public.Enums.lead_origin.map(origin => (
-                        <SelectItem key={origin} value={origin}>{origin}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-              {errors.origem && <p className="text-sm text-destructive">{errors.origem.message}</p>}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
-              <Controller
-                control={control}
-                name="status"
-                render={({ field }) => (
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione o status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Constants.public.Enums.lead_status.map(status => (
-                        <SelectItem key={status} value={status}>{status}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-              {errors.status && <p className="text-sm text-destructive">{errors.status.message}</p>}
-            </div>
-          </div>
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={mutation.isPending}>
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Salvar Alterações
-            </Button>
-          </DialogFooter>
-        </form>
+          </form>
+        </div>
+        <DialogFooter>
+          <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={mutation.isPending}>
+            Cancelar
+          </Button>
+          <Button type="submit" form="edit-lead-form" disabled={mutation.isPending}>
+            {mutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Salvar Alterações
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
