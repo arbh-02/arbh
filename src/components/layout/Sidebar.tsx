@@ -36,8 +36,8 @@ const SidebarContent = ({ onLinkClick }: { onLinkClick?: () => void }) => {
     <div className="flex h-full flex-col">
       {/* Header */}
       <div className="flex h-16 items-center border-b border-sidebar-border px-6">
-        <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">
-          CRM NoCode
+        <h1 className="text-xl font-bold text-primary">
+          Dr.lead
         </h1>
       </div>
 

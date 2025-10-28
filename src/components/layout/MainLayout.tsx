@@ -13,8 +13,8 @@ const MobileHeader = () => {
         <span className="sr-only">Toggle Menu</span>
       </Button>
       <div className="ml-4">
-        <h1 className="text-lg font-bold bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">
-          CRM NoCode
+        <h1 className="text-lg font-bold text-primary">
+          Dr.lead
         </h1>
       </div>
     </header>

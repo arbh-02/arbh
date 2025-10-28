@@ -104,8 +104,8 @@ const Auth = () => {
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md card-gradient border-border">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-3xl font-bold text-center bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">
-            CRM NoCode
+          <CardTitle className="text-3xl font-bold text-center text-primary">
+            Dr.lead
           </CardTitle>
           <CardDescription className="text-center">
             Sistema de gestão comercial simplificado
