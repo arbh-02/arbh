@@ -71,18 +71,15 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
 
   const mutation = useMutation({
     mutationFn: async (values: z.infer<typeof formSchema>) => {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("leads")
         .update({
           ...values,
           email: values.email === "" ? null : values.email,
         })
-        .eq('id', lead.id as any)
-        .select()
-        .single();
+        .eq('id', lead.id as any);
 
       if (error) throw new Error(error.message);
-      return data;
     },
     onSuccess: () => {
       toast.success("Lead atualizado com sucesso!");

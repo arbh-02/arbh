@@ -47,21 +47,18 @@ export const EditUserDialog = ({ user, open, onOpenChange }: EditUserDialogProps
 
   const mutation = useMutation({
     mutationFn: async (values: z.infer<typeof formSchema>) => {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("app_users")
         .update({
           nome: values.nome,
           email: values.email === "" ? null : values.email,
           papel: values.papel,
         })
-        .eq("id", user.id)
-        .select()
-        .single();
+        .eq("id", user.id);
 
       if (error) {
         throw new Error(error.message);
       }
-      return data;
     },
     onSuccess: () => {
       toast.success("Usuário atualizado com sucesso!");
