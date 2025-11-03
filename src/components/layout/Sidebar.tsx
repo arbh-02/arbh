@@ -21,7 +21,7 @@ const navItems: NavItem[] = [
   { label: "Leads", href: "/leads", icon: Users },
   { label: "Agenda", href: "/agenda", icon: Calendar },
   { label: "Conversas", href: "/conversas", icon: MessageSquare },
-  { label: "Integrações", href: "/integrations", icon: Puzzle },
+  { label: "Integrações", href: "/integrations", icon: Puzzle, adminOnly: true },
   { label: "Admin", href: "/admin", icon: Settings, adminOnly: true },
 ];
 
