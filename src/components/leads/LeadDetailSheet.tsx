@@ -11,15 +11,16 @@ import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
-import { Loader2, Edit, Trash2, User, Building, Mail, Phone, DollarSign, Tag, BarChart, Calendar, MessageSquare } from "lucide-react";
+import { Loader2, Edit, Trash2, User, Building, Mail, Phone, DollarSign, Tag, BarChart, Calendar, MessageSquare, MessageCircle } from "lucide-react";
 import { formatCurrency, formatDate, getWhatsAppLink } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
 import { EditLeadDialog } from "./EditLeadDialog";
 import { DeleteLeadDialog } from "./DeleteLeadDialog";
-import { Separator } from "@/components/ui/separator";
 import { ActivityTimeline } from "./ActivityTimeline";
 import { useAuth } from "@/contexts/AuthContext";
 import { getLeadOriginLabel, getLeadStatusLabel } from "@/lib/mapping";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { WhatsappChat } from "./WhatsappChat";
 
 type Lead = Tables<'leads'>;
 type AppUser = Tables<'app_users'>;
@@ -100,51 +101,67 @@ export const LeadDetailSheet = ({ leadId, open, onOpenChange }: LeadDetailSheetP
               <SheetHeader className="text-left">
                 <SheetTitle className="text-2xl">{lead.nome}</SheetTitle>
                 <SheetDescription>
-                  Detalhes completos do lead.
+                  Detalhes completos e histórico de comunicação do lead.
                 </SheetDescription>
               </SheetHeader>
-              <div className="flex-1 overflow-y-auto pr-6 space-y-6 py-4">
-                <DetailRow icon={Building} label="Empresa" value={lead.empresa} />
-                <DetailRow icon={Mail} label="Email" value={lead.email} />
-                <DetailRow 
-                  icon={Phone} 
-                  label="Telefone" 
-                  value={
-                    lead.telefone ? (
-                      <div className="flex items-center gap-2">
-                        <span>{lead.telefone}</span>
-                        {appUser && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7"
-                            onClick={() => {
-                              const message = "Olá {nome}, tudo bem? Sou {vendedor} da Dr.lead.";
-                              const link = getWhatsAppLink(lead.telefone!, message, appUser.nome, lead.nome);
-                              window.open(link, "_blank");
-                            }}
-                          >
-                            <MessageSquare className="h-4 w-4 text-green-500" />
-                          </Button>
-                        )}
-                      </div>
-                    ) : (
-                      "Não informado"
-                    )
-                  } 
-                />
-                <DetailRow icon={DollarSign} label="Valor" value={formatCurrency(lead.valor)} />
-                <DetailRow icon={Tag} label="Origem" value={<Badge variant="outline">{getLeadOriginLabel(lead.origem)}</Badge>} />
-                <DetailRow icon={BarChart} label="Status" value={<Badge className={getStatusColor(lead.status)}>{getLeadStatusLabel(lead.status)}</Badge>} />
-                <DetailRow icon={User} label="Responsável" value={user?.nome} />
-                <DetailRow icon={Calendar} label="Criado em" value={formatDate(lead.created_at)} />
-                <Separator />
-                <div>
-                  <h3 className="text-lg font-semibold mb-4">Atividades</h3>
+
+              <Tabs defaultValue="details" className="flex-1 flex flex-col overflow-hidden">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="details">Detalhes</TabsTrigger>
+                  <TabsTrigger value="activities">Atividades</TabsTrigger>
+                  <TabsTrigger value="whatsapp">
+                    <MessageCircle className="mr-2 h-4 w-4" />
+                    WhatsApp
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="details" className="flex-1 overflow-y-auto pr-6 space-y-6 py-4">
+                  <DetailRow icon={Building} label="Empresa" value={lead.empresa} />
+                  <DetailRow icon={Mail} label="Email" value={lead.email} />
+                  <DetailRow 
+                    icon={Phone} 
+                    label="Telefone" 
+                    value={
+                      lead.telefone ? (
+                        <div className="flex items-center gap-2">
+                          <span>{lead.telefone}</span>
+                          {appUser && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7"
+                              onClick={() => {
+                                const message = "Olá {nome}, tudo bem? Sou {vendedor} da Dr.lead.";
+                                const link = getWhatsAppLink(lead.telefone!, message, appUser.nome, lead.nome);
+                                window.open(link, "_blank");
+                              }}
+                            >
+                              <MessageSquare className="h-4 w-4 text-green-500" />
+                            </Button>
+                          )}
+                        </div>
+                      ) : (
+                        "Não informado"
+                      )
+                    } 
+                  />
+                  <DetailRow icon={DollarSign} label="Valor" value={formatCurrency(lead.valor)} />
+                  <DetailRow icon={Tag} label="Origem" value={<Badge variant="outline">{getLeadOriginLabel(lead.origem)}</Badge>} />
+                  <DetailRow icon={BarChart} label="Status" value={<Badge className={getStatusColor(lead.status)}>{getLeadStatusLabel(lead.status)}</Badge>} />
+                  <DetailRow icon={User} label="Responsável" value={user?.nome} />
+                  <DetailRow icon={Calendar} label="Criado em" value={formatDate(lead.created_at)} />
+                </TabsContent>
+
+                <TabsContent value="activities" className="flex-1 overflow-y-auto pr-6 py-4">
                   <ActivityTimeline leadId={lead.id as any} />
-                </div>
-              </div>
-              <SheetFooter className="mt-auto">
+                </TabsContent>
+
+                <TabsContent value="whatsapp" className="flex-1 overflow-y-auto pr-6 py-4">
+                  <WhatsappChat leadId={lead.id as any} />
+                </TabsContent>
+              </Tabs>
+
+              <SheetFooter className="mt-auto pt-4 border-t">
                 <Button variant="destructive" onClick={() => setIsDeleting(true)}>
                   <Trash2 className="mr-2 h-4 w-4" />
                   Excluir
