@@ -16,6 +16,7 @@ import NotFound from "./pages/NotFound";
 import Integrations from "./pages/Integrations";
 import GoogleDriveSettings from "./pages/GoogleDriveSettings";
 import Agenda from "./pages/Agenda";
+import Conversations from "./pages/Conversations";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
               <Route path="/pipeline" element={<ProtectedRoute><Pipeline /></ProtectedRoute>} />
               <Route path="/leads" element={<ProtectedRoute><Leads /></ProtectedRoute>} />
               <Route path="/agenda" element={<ProtectedRoute><Agenda /></ProtectedRoute>} />
+              <Route path="/conversas" element={<ProtectedRoute><Conversations /></ProtectedRoute>} />
               <Route path="/integrations" element={<ProtectedRoute><Integrations /></ProtectedRoute>} />
               <Route path="/integrations/google-drive" element={<ProtectedRoute><GoogleDriveSettings /></ProtectedRoute>} />
               <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
