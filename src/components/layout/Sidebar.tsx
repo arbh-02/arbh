@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, KanbanSquare, Users, Settings, UserCircle, LogOut, Puzzle } from "lucide-react";
+import { LayoutDashboard, KanbanSquare, Users, Settings, UserCircle, LogOut, Puzzle, Calendar } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,7 @@ const navItems: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Pipeline", href: "/pipeline", icon: KanbanSquare },
   { label: "Leads", href: "/leads", icon: Users },
+  { label: "Agenda", href: "/agenda", icon: Calendar },
   { label: "Integrações", href: "/integrations", icon: Puzzle },
   { label: "Admin", href: "/admin", icon: Settings, adminOnly: true },
 ];
