@@ -140,11 +140,11 @@ const Leads = () => {
             <thead>
               <tr className="border-b border-border">
                 <th className="text-left py-3 px-4 font-medium">Nome</th>
-                <th className="text-left py-3 px-4 font-medium">Empresa</th>
+                <th className="text-left py-3 px-4 font-medium hidden md:table-cell">Empresa</th>
                 <th className="text-left py-3 px-4 font-medium">Status</th>
-                <th className="text-left py-3 px-4 font-medium">Responsável</th>
-                <th className="text-left py-3 px-4 font-medium">Valor</th>
-                <th className="text-left py-3 px-4 font-medium">Criado em</th>
+                <th className="text-left py-3 px-4 font-medium hidden lg:table-cell">Responsável</th>
+                <th className="text-left py-3 px-4 font-medium hidden sm:table-cell">Valor</th>
+                <th className="text-left py-3 px-4 font-medium hidden xl:table-cell">Criado em</th>
                 <th className="text-right py-3 px-4 font-medium">Ações</th>
               </tr>
             </thead>
@@ -170,15 +170,15 @@ const Leads = () => {
                   >
                     <td className="py-3 px-4">
                       <div className="font-medium">{lead.nome}</div>
-                      <div className="text-sm text-muted-foreground">{lead.email}</div>
+                      <div className="text-sm text-muted-foreground truncate max-w-[150px]">{lead.email}</div>
                     </td>
-                    <td className="py-3 px-4">{lead.empresa}</td>
+                    <td className="py-3 px-4 hidden md:table-cell">{lead.empresa}</td>
                     <td className="py-3 px-4">
                       <Badge className={getStatusColor(lead.status)}>{getLeadStatusLabel(lead.status)}</Badge>
                     </td>
-                    <td className="py-3 px-4">{usersMap.get(lead.responsavel_id as any)}</td>
-                    <td className="py-3 px-4 font-semibold">{formatCurrency(lead.valor)}</td>
-                    <td className="py-3 px-4 text-sm text-muted-foreground">{formatDate(lead.created_at)}</td>
+                    <td className="py-3 px-4 hidden lg:table-cell">{usersMap.get(lead.responsavel_id as any)}</td>
+                    <td className="py-3 px-4 font-semibold hidden sm:table-cell">{formatCurrency(lead.valor)}</td>
+                    <td className="py-3 px-4 text-sm text-muted-foreground hidden xl:table-cell">{formatDate(lead.created_at)}</td>
                     <td className="py-3 px-4 text-right">
                       <div className="flex items-center justify-end gap-1">
                         {lead.telefone && appUser && (
