@@ -103,10 +103,10 @@ const Auth = () => {
 
   return (
     <div className="grid min-h-screen grid-cols-1 lg:grid-cols-2 bg-background">
-      <div className="hidden lg:flex flex-col items-center justify-center p-8 bg-zinc-900/50 border-r border-border text-center">
+      <div className="hidden lg:flex flex-col items-center justify-center p-8 bg-white border-r border-border text-center">
         <Logo size="xl" className="h-48" />
-        <h2 className="mt-8 text-3xl font-bold text-foreground">Potencialize suas Vendas</h2>
-        <p className="mt-2 text-muted-foreground">
+        <h2 className="mt-8 text-3xl font-bold text-black">Potencialize suas Vendas</h2>
+        <p className="mt-2 text-gray-700">
           Organize seus leads, gerencie seu pipeline e feche mais negócios com Dr.lead.
         </p>
       </div>
