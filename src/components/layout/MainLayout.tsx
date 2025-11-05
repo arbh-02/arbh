@@ -3,6 +3,7 @@ import { Sidebar } from "./Sidebar";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import { useApp } from "@/contexts/AppContext";
+import { Logo } from "@/components/Logo";
 
 const MobileHeader = () => {
   const { setUI } = useApp();
@@ -13,9 +14,7 @@ const MobileHeader = () => {
         <span className="sr-only">Toggle Menu</span>
       </Button>
       <div className="ml-4">
-        <h1 className="text-lg font-bold text-primary">
-          Dr.lead
-        </h1>
+        <Logo size="sm" />
       </div>
     </header>
   );

@@ -1,25 +1,28 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 
-interface LogoProps extends React.HTMLAttributes<HTMLDivElement> {
+interface LogoProps extends React.HTMLAttributes<HTMLImageElement> {
   size?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
-export const Logo = ({ className, size = 'lg' }: LogoProps) => {
+export const Logo = ({ className, size = 'lg', ...props }: LogoProps) => {
   const sizeClasses = {
-    sm: 'text-xl',
-    md: 'text-3xl',
-    lg: 'text-5xl',
-    xl: 'text-7xl',
+    sm: 'h-8',
+    md: 'h-10',
+    lg: 'h-16',
+    xl: 'h-24',
   };
 
   return (
-    <div className={cn(
-      'font-bold text-primary',
-      sizeClasses[size],
-      className
-    )}>
-      Dr.lead
-    </div>
+    <img
+      src="/logo.png"
+      alt="Dr.lead Logo"
+      className={cn(
+        'object-contain',
+        sizeClasses[size],
+        className
+      )}
+      {...props}
+    />
   );
 };

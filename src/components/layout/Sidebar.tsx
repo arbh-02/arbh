@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useApp } from "@/contexts/AppContext";
+import { Logo } from "@/components/Logo";
 
 interface NavItem {
   label: string;
@@ -38,10 +39,8 @@ const SidebarContent = ({ onLinkClick }: { onLinkClick?: () => void }) => {
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
-      <div className="flex h-16 items-center border-b border-sidebar-border px-6">
-        <h1 className="text-xl font-bold text-primary">
-          Dr.lead
-        </h1>
+      <div className="flex h-16 items-center border-b border-sidebar-border px-4">
+        <Logo size="md" />
       </div>
 
       {/* Navigation */}

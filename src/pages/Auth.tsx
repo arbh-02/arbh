@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
@@ -104,7 +104,7 @@ const Auth = () => {
   return (
     <div className="grid min-h-screen grid-cols-1 lg:grid-cols-2 bg-background">
       <div className="hidden lg:flex flex-col items-center justify-center p-8 bg-zinc-900/50 border-r border-border text-center">
-        <Logo size="xl" />
+        <Logo size="xl" className="h-48" />
         <h2 className="mt-8 text-3xl font-bold text-foreground">Potencialize suas Vendas</h2>
         <p className="mt-2 text-muted-foreground">
           Organize seus leads, gerencie seu pipeline e feche mais negócios com Dr.lead.
@@ -112,11 +112,9 @@ const Auth = () => {
       </div>
       <div className="flex items-center justify-center p-4">
         <Card className="w-full max-w-md card-gradient border-border">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-3xl font-bold text-center text-primary">
-              Dr.lead
-            </CardTitle>
-            <CardDescription className="text-center">
+          <CardHeader className="space-y-1 items-center">
+            <Logo size="lg" className="h-24" />
+            <CardDescription className="text-center pt-2">
               Sistema de gestão comercial simplificado
             </CardDescription>
           </CardHeader>
