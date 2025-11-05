@@ -11,7 +11,7 @@ import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { AuthGraphic } from "@/components/AuthGraphic";
+import { Logo } from "@/components/Logo";
 
 const signUpSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
@@ -104,7 +104,7 @@ const Auth = () => {
   return (
     <div className="grid min-h-screen grid-cols-1 lg:grid-cols-2 bg-background">
       <div className="hidden lg:flex flex-col items-center justify-center p-8 bg-zinc-900/50 border-r border-border text-center">
-        <AuthGraphic />
+        <Logo size="xl" />
         <h2 className="mt-8 text-3xl font-bold text-foreground">Potencialize suas Vendas</h2>
         <p className="mt-2 text-muted-foreground">
           Organize seus leads, gerencie seu pipeline e feche mais negócios com Dr.lead.
