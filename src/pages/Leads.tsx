@@ -18,6 +18,7 @@ import { getLeadOriginLabel, getLeadStatusLabel } from "@/lib/mapping";
 import { EditLeadDialog } from "@/components/leads/EditLeadDialog";
 import { DeleteLeadDialog } from "@/components/leads/DeleteLeadDialog";
 import { ImportLeadsDialog } from "@/components/leads/ImportLeadsDialog";
+import { useWhatsappIntegration } from "@/hooks/use-whatsapp-integration";
 
 type Lead = Tables<'leads'>;
 type AppUser = Tables<'app_users'>;
@@ -30,6 +31,7 @@ const Leads = () => {
   const [editingLead, setEditingLead] = useState<Lead | null>(null);
   const [deletingLead, setDeletingLead] = useState<Lead | null>(null);
   const { appUser } = useAuth();
+  const { settings: whatsappSettings } = useWhatsappIntegration();
 
   const { data: leads, isLoading: isLoadingLeads } = useQuery<Lead[]>({
     queryKey: ['leads'],
@@ -95,6 +97,48 @@ const Leads = () => {
       case "ganho": return "bg-green-500/20 text-green-300 border-green-500/50";
       case "perdido": return "bg-red-500/20 text-red-300 border-red-500/50";
       default: return "";
+    }
+  };
+
+  const handleSendMessage = async (lead: Lead) => {
+    if (!appUser || !lead.telefone) return;
+
+    const defaultMessage = "Olá {nome}, tudo bem? Sou {vendedor} da Dr.lead.";
+    const personalizedMessage = defaultMessage
+      .replace('{nome}', lead.nome)
+      .replace('{vendedor}', appUser.nome);
+
+    if (whatsappSettings.isEnabled && whatsappSettings.webhookUrl) {
+      // Se a integração estiver ativa e tiver URL de webhook de envio, usa a API
+      try {
+        const response = await fetch(whatsappSettings.webhookUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${whatsappSettings.secretKey}`,
+          },
+          body: JSON.stringify({
+            leadId: lead.id,
+            leadName: lead.nome,
+            phone: lead.telefone,
+            message: personalizedMessage,
+            direction: 'outgoing',
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Falha ao enviar mensagem via API.");
+        }
+
+        toast.success("Mensagem enviada com sucesso via API!");
+      } catch (error: any) {
+        console.error("Erro ao enviar mensagem via API:", error);
+        toast.error(`Erro ao enviar mensagem: ${error.message}. Verifique a configuração do Webhook.`);
+      }
+    } else {
+      // Caso contrário, usa o link wa.me padrão
+      const link = getWhatsAppLink(lead.telefone, defaultMessage, appUser.nome, lead.nome);
+      window.open(link, "_blank");
     }
   };
 
@@ -188,9 +232,7 @@ const Leads = () => {
                             className="h-8 w-8"
                             onClick={(e) => {
                               e.stopPropagation();
-                              const message = "Olá {nome}, tudo bem? Sou {vendedor} da Dr.lead.";
-                              const link = getWhatsAppLink(lead.telefone!, message, appUser.nome, lead.nome);
-                              window.open(link, "_blank");
+                              handleSendMessage(lead);
                             }}
                           >
                             <MessageSquare className="h-4 w-4 text-green-500" />

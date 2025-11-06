@@ -5,6 +5,9 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ConversationList } from "@/components/whatsapp/ConversationList";
 import { ChatPanel } from "@/components/whatsapp/ChatPanel";
+import { useWhatsappIntegration } from "@/hooks/use-whatsapp-integration";
+import { WhatsappSettingsComponent } from "@/components/whatsapp/WhatsappSettings";
+import { Loader2 } from "lucide-react";
 
 interface Conversation {
   lead_id: string;
@@ -15,17 +18,41 @@ interface Conversation {
 
 const Conversations = () => {
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
+  const { settings, isLoading: isLoadingSettings } = useWhatsappIntegration();
 
-  const { data: conversations, isLoading } = useQuery<Conversation[]>({
+  const { data: conversations, isLoading: isLoadingConversations } = useQuery<Conversation[]>({
     queryKey: ['whatsapp_conversations'],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_latest_whatsapp_conversations');
       if (error) throw new Error(error.message);
       return data || [];
-    }
+    },
+    enabled: settings.isEnabled, // Só busca conversas se a integração estiver ativa
   });
 
   const selectedLead = conversations?.find(c => c.lead_id === selectedLeadId);
+
+  if (isLoadingSettings) {
+    return (
+      <MainLayout>
+        <div className="flex justify-center items-center h-screen">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        </div>
+      </MainLayout>
+    );
+  }
+
+  if (!settings.isEnabled) {
+    return (
+      <MainLayout>
+        <PageHeader
+          title="Conversas"
+          description="Visualize e gerencie suas conversas do WhatsApp."
+        />
+        <WhatsappSettingsComponent />
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout>
@@ -39,7 +66,7 @@ const Conversations = () => {
             conversations={conversations || []}
             selectedLeadId={selectedLeadId}
             onSelect={setSelectedLeadId}
-            isLoading={isLoading}
+            isLoading={isLoadingConversations}
           />
         </div>
         <div className="hidden md:flex md:w-2/3">
